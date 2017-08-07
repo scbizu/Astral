@@ -1,157 +1,209 @@
 baocan:
-  - name: 脆皮小牛排
-    price: 38
-    star: 0
-    tag: ["meat","recommend"]
-  - name: 玉米基围虾
-    price: 39
-    star: 0
-    tag: ["meat","recommend"]
-  - name: 传统蚝油牛肉
-    price: 36
-    star: 0
-    tag: ["meat","recommend"]
-  - name: 天府椒麻鸡
-    price: 58
-    star: 0
-    tag: ["meat","recommend"]
-  - name: 本帮油爆虾
-    price: 52
-    star: 0
-    tag: ["meat","recommend"]
-  - name: 本帮油爆虾
-    price: 52
-    star: 0
-    tag: ["meat","recommend"]
-  - name: 外婆红烧肉
-    price: 48
-    star: 0
-    tag: ["meat","recommend"]
-  - name: 红烧千岛湖鳊鱼
-    price: 46
-    star: 0
-    tag: ["meat","recommend"]
-  - name: 黑椒扇子骨
-    price: 39
-    star: 0
-    tag: ["meat","recommend"]
-  - name: 广式椒盐猪手
-    price: 18
-    star: 0
-    tag: ["meat","recommend"]
-  - name: 宝灿小炒肉
-    price: 30
-    star: 0
-    tag: ["meat"]
-  - name: 千叶豆腐炒腊肉
-    price: 28
-    star: 0
-    tag: ["meat","vege"]
-  - name: 香脆小米锅巴
-    price: 28
-    star: 0
-    tag: [vege","paddy"]
-  - name: 青椒肉丝炒毛豆
-    price: 26
-    star: 0
-    tag: ["meat","vege"]
-  - name: 虎皮椒塞肉
-    price: 30
-    star: 0
-    tag: ["meat"]
-  - name: 椒盐排条
-    price: 28
-    star: 0
-    tag: ["meat"]
-  - name: 特色酱爆猪肝
-    price: 28
-    star: 0
-    tag: ["meat"]
-  - name: 莴笋炒肉片
-    price: 26
-    star: 0
-    tag: ["vege"]
-  - name: 肉糜粉丝煲
-    price: 22
-    star: 0
-    tag: ["meat"]
-  - name: 酸汤肥牛
-    price: 38
-    star: 0
-    tag: ["meat"]
-  - name: 香芹猪脆骨
-    price: 30
-    star: 0
-    tag: ["meat"]
-  - name: 糖醋排条
-    price: 28
-    star: 0
-    tag: ["meat"]
-  - name: 咸肉炖笋衣
-    price: 28
-    star: 0
-    tag: ["meat"]
-  - name: 金针肥牛
-    price: 32
-    star: 0
-    tag: ["meat"]
-  - name: 川香麻椒鱼
-    price: 39
-    star: 0
-    tag: ["meat"]
-  - name: 酸菜鱼片
-    price: 39
-    star: 0
-    tag: ["meat"]
-  - name: 剁椒鱼头
-    price: 46
-    star: 0
-    tag: ["meat"]
-  - name: 东海带鱼
-    price: 38
-    star: 0
-    tag: ["meat"]
-  - name: 水煮鱼片
-    price: 39
-    star: 0
-    tag: ["meat"]
-  - name: 绝顶山城毛血旺
-    price: 42
-    star: 0
-    tag: ["meat"]
-  - name: 川府豆花鱼
-    price: 39
-    star: 0
-    tag: ["meat"]
-  - name: 清蒸鲈鱼
-    price: 36
-    star: 0
-    tag: ["meat"]
-  - name: 糟溜鱼片
-    price: 32
-    star: 0
-    tag: ["meat"]
-  - name: 秘制吮指元宝虾
-    price: 39
-    star: 0
-    tag: ["meat"]
-  - name: 农家蛋饺
-    price: 32
-    star: 0
-    tag: ["meat"]
-  - name: 鸭血四宝
-    price: 26
-    star: 0
-    tag: ["vege"]
-  - name: 虾仁木须蛋
-    price: 28
-    star: 0
-    tag: ["meat"]
-  - name: 丝瓜炒鸡蛋
-    price: 22
-    star: 0
-    tag: ["vege"]
-  - name: 三杯鸡
-    price: 32
-    star: 0
-    tag: ["meat"]
+- name: 脆皮小牛排
+  price: 38
+  star: 0
+  tag:
+  - meat
+  - recommend
+- name: 玉米基围虾
+  price: 39
+  star: 0
+  tag:
+  - meat
+  - recommend
+- name: 传统蚝油牛肉
+  price: 36
+  star: 0
+  tag:
+  - meat
+  - recommend
+- name: 天府椒麻鸡
+  price: 58
+  star: 0
+  tag:
+  - meat
+  - recommend
+- name: 本帮油爆虾
+  price: 52
+  star: 0
+  tag:
+  - meat
+  - recommend
+- name: 本帮油爆虾
+  price: 52
+  star: 0
+  tag:
+  - meat
+  - recommend
+- name: 外婆红烧肉
+  price: 48
+  star: 0
+  tag:
+  - meat
+  - recommend
+- name: 红烧千岛湖鳊鱼
+  price: 46
+  star: 0
+  tag:
+  - meat
+  - recommend
+- name: 黑椒扇子骨
+  price: 39
+  star: 0
+  tag:
+  - meat
+  - recommend
+- name: 广式椒盐猪手
+  price: 18
+  star: 0
+  tag:
+  - meat
+  - recommend
+- name: 宝灿小炒肉
+  price: 30
+  star: 0
+  tag:
+  - meat
+- name: 千叶豆腐炒腊肉
+  price: 28
+  star: 0
+  tag:
+  - meat
+  - vege
+- name: 香脆小米锅巴
+  price: 28
+  star: 0
+  tag:
+  - vege"
+  - paddy
+- name: 青椒肉丝炒毛豆
+  price: 26
+  star: 0
+  tag:
+  - meat
+  - vege
+- name: 虎皮椒塞肉
+  price: 30
+  star: 0
+  tag:
+  - meat
+- name: 椒盐排条
+  price: 28
+  star: 0
+  tag:
+  - meat
+- name: 特色酱爆猪肝
+  price: 28
+  star: 0
+  tag:
+  - meat
+- name: 莴笋炒肉片
+  price: 26
+  star: 0
+  tag:
+  - vege
+- name: 肉糜粉丝煲
+  price: 22
+  star: 0
+  tag:
+  - meat
+- name: 酸汤肥牛
+  price: 38
+  star: 0
+  tag:
+  - meat
+- name: 香芹猪脆骨
+  price: 30
+  star: 0
+  tag:
+  - meat
+- name: 糖醋排条
+  price: 28
+  star: 0
+  tag:
+  - meat
+- name: 咸肉炖笋衣
+  price: 28
+  star: 0
+  tag:
+  - meat
+- name: 金针肥牛
+  price: 32
+  star: 0
+  tag:
+  - meat
+- name: 川香麻椒鱼
+  price: 39
+  star: 0
+  tag:
+  - meat
+- name: 酸菜鱼片
+  price: 39
+  star: 0
+  tag:
+  - meat
+- name: 剁椒鱼头
+  price: 46
+  star: 0
+  tag:
+  - meat
+- name: 东海带鱼
+  price: 38
+  star: 0
+  tag:
+  - meat
+- name: 水煮鱼片
+  price: 39
+  star: 0
+  tag:
+  - meat
+- name: 绝顶山城毛血旺
+  price: 42
+  star: 0
+  tag:
+  - meat
+- name: 川府豆花鱼
+  price: 39
+  star: 0
+  tag:
+  - meat
+- name: 清蒸鲈鱼
+  price: 36
+  star: 0
+  tag:
+  - meat
+- name: 糟溜鱼片
+  price: 32
+  star: 0
+  tag:
+  - meat
+- name: 秘制吮指元宝虾
+  price: 39
+  star: 0
+  tag:
+  - meat
+- name: 农家蛋饺
+  price: 32
+  star: 0
+  tag:
+  - meat
+- name: 鸭血四宝
+  price: 26
+  star: 0
+  tag:
+  - vege
+- name: 虾仁木须蛋
+  price: 28
+  star: 0
+  tag:
+  - meat
+- name: 丝瓜炒鸡蛋
+  price: 22
+  star: 0
+  tag:
+  - vege
+- name: 三杯鸡
+  price: 32
+  star: 0
+  tag:
+  - meat

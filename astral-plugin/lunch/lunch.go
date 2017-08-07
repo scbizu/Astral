@@ -14,6 +14,7 @@ const (
 	SPACE = "    "
 	//ENTER defines enter globally
 	ENTER = "\n"
+
 )
 
 var (
@@ -24,7 +25,8 @@ var (
 	members map[string]*wxweb.User
 
 	owner string
-	// mmChannel chan map[string]*wxweb.User
+	//DataFilePath is the recipe yaml
+	DataFilePath = "./astral-plugin/lunch/recipe.yaml"
 )
 
 //Register regist the lunch plugin to the bot
@@ -38,10 +40,6 @@ func Register(session *wxweb.Session, lunchFunc func(session *wxweb.Session, msg
 	}
 
 }
-
-func addmember() {}
-
-func deletemember() {}
 
 func defaultLunch(session *wxweb.Session, msg *wxweb.ReceivedMessage) {
 
@@ -60,7 +58,7 @@ func defaultLunch(session *wxweb.Session, msg *wxweb.ReceivedMessage) {
 	}
 	mm, err := wxweb.CreateMemberManagerFromGroupContact(session, contact)
 	if err != nil {
-		log.Panicln(err)
+		log.Println(err)
 		return
 	}
 	whoCall := mm.GetContactByUserName(msg.Who)
@@ -93,20 +91,14 @@ func defaultLunch(session *wxweb.Session, msg *wxweb.ReceivedMessage) {
 		case "send":
 			if taking && msg.FromUserName == owner {
 				session.SendText("您好,我们点菜,12点左右过来吃。菜单是:\n "+showRecipe(orderList)+"\n 麻烦了,O(∩_∩)O谢谢~", session.Bot.UserName, receiver)
-				session.SendText("recipe was sent,type /star (?) to star this recipe after lunch.", session.Bot.UserName, msg.FromUserName)
+				session.SendText("recipe was sent,type /star ?(0 - 5) to star this recipe after lunch.", session.Bot.UserName, msg.FromUserName)
 				//reset
 				taking = false
 			} else {
 				session.SendText("WTF!Dont kidding me!", session.Bot.UserName, msg.FromUserName)
 			}
 		case "star":
-			if lunching && msg.FromUserName == owner {
-				star := strings.TrimPrefix(rawCommand, "star")
-				session.SendText("The recipe is "+star+" ✨,it will work next time.type /end to end.", session.Bot.UserName, msg.FromUserName)
-				owner = ""
-			} else {
-				session.SendText("WTF!Dont kidding me!", session.Bot.UserName, msg.FromUserName)
-			}
+
 		case "join":
 			if !lunching {
 				session.SendText("no lunch now,type /lunch to create a new lunch", session.Bot.UserName, msg.FromUserName)
@@ -156,6 +148,25 @@ func defaultLunch(session *wxweb.Session, msg *wxweb.ReceivedMessage) {
 					if len(orderListsName) > 0 {
 						session.SendText(showRecipeByName(orderListsName)+"\n type /send to send this order to BAOCAN", session.Bot.UserName, msg.FromUserName)
 					}
+					orderList = convertRecipe(orderListsName)
+				} else {
+					session.SendText("WTF!Dont kidding me!", session.Bot.UserName, msg.FromUserName)
+				}
+			} else if strings.Contains(rawCommand, "star") {
+				if lunching && msg.FromUserName == owner {
+					star := strings.TrimSpace(strings.TrimPrefix(rawCommand, "star"))
+					starInt, err := strconv.ParseInt(star, 10, 64)
+					if err != nil {
+						log.Println(err)
+						session.SendText("ERROR!What are U fucking typing! plz re-type it!", session.Bot.UserName, msg.FromUserName)
+					}
+					err = starRecipe(orderList, int(starInt))
+					if err != nil {
+						log.Println(err)
+						session.SendText("ERROR!What are U fucking typing! plz re-type it!", session.Bot.UserName, msg.FromUserName)
+					}
+					session.SendText("The recipe is "+star+" ✨,it will work next time.type /end to end.", session.Bot.UserName, msg.FromUserName)
+					owner = ""
 				} else {
 					session.SendText("WTF!Dont kidding me!", session.Bot.UserName, msg.FromUserName)
 				}

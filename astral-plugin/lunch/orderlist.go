@@ -70,6 +70,18 @@ func getRecipe(count int) (orderLists []string) {
 	return
 }
 
+func convertRecipe(raw []string) (res []int) {
+	data := loadData()
+	for idx, recipe := range data.Baocan {
+		for _, order := range raw {
+			if recipe.Name == order {
+				res = append(res, idx)
+			}
+		}
+	}
+	return
+}
+
 func showRecipe(orders []int) (showRecipeStrs string) {
 	r := loadData()
 	for idx, recipe := range r.Baocan {
@@ -103,7 +115,7 @@ func getAllRecipeInfo() (showRecipeStrs string) {
 }
 
 func loadData() *Restaurant {
-	data, err := ioutil.ReadFile("./astral-plugin/lunch/recipe.yaml")
+	data, err := ioutil.ReadFile(DataFilePath)
 	if err != nil {
 		log.Println(err)
 	}
