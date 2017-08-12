@@ -5,4 +5,4 @@ MAINTAINER scnace "scbizu@gmail.com"
 
 ADD . $GOPATH/src/astral
 
-RUN go run wx.go
+RUN go run $GOPATH/src/astral/wx.go
