@@ -3,7 +3,6 @@ package main
 import (
 	"log"
 
-	"github.com/astaxie/beego/logs"
 	"github.com/scbizu/wechat-go/wxweb"
 	"github.com/scbizu/wxgo/astral-plugin/lunch"
 )
@@ -18,7 +17,7 @@ func main() {
 	lunch.Register(session, nil)
 
 	if err := session.LoginAndServe(false); err != nil {
-		logs.Error("session exit, %s", err)
+		log.Fatal(err)
 	}
 	// for {
 	// 	if err := session.LoginAndServe(false); err != nil {
@@ -41,8 +40,8 @@ func main() {
 	// }
 }
 
-func autoReply(session *wxweb.Session, msg *wxweb.ReceivedMessage) {
-	if !msg.IsGroup {
-		session.SendText("留言收到了,🐔正在认真搬砖哦~", session.Bot.UserName, msg.FromUserName)
-	}
-}
+// func autoReply(session *wxweb.Session, msg *wxweb.ReceivedMessage) {
+// 	if !msg.IsGroup {
+// 		session.SendText("留言收到了,🐔正在认真搬砖哦~", session.Bot.UserName, msg.FromUserName)
+// 	}
+// }
