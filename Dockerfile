@@ -5,6 +5,6 @@ MAINTAINER scnace "scbizu@gmail.com"
 
 ADD . $GOPATH/src/github.com/scbizu/Astral
 
-RUN go install $GOPATH/src/github.com/scbizu/Astral
+RUN cd $GOPATH/src/github.com/scbizu/Astral && go install 
 
 ENTRYPOINT $GOPATH/bin/Astral
