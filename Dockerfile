@@ -5,8 +5,4 @@ MAINTAINER scnace "scbizu@gmail.com"
 
 ADD . $GOPATH/src/astral
 
-RUN go get -u github.com/golang/dep/cmd/dep
-
-RUN dep init
-
-RUN go run $GOPATH/src/astral/wx.go
+RUN go get -u github.com/golang/dep/cmd/dep && dep init && go run $GOPATH/src/astral/wx.go
