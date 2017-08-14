@@ -24,3 +24,6 @@
   name = "github.com/mdp/qrterminal"
   version = "0.1.1"
 
+[[override]]
+  name = "github.com/spf13/cobra"
+  revision = "b26b538f693051ac6518e65672de3144ce3fbedc"

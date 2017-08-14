@@ -14,6 +14,12 @@
   revision = "25c4ec802a7d637f88d584ab26798e94ad14c13b"
 
 [[projects]]
+  name = "github.com/inconshreveable/mousetrap"
+  packages = ["."]
+  revision = "76626ae9c91c4f2a10f34cad8ce83ea42c93bb75"
+  version = "v1.0"
+
+[[projects]]
   name = "github.com/mattn/go-colorable"
   packages = ["."]
   revision = "941b50ebc6efddf4c41c8e4537a5f68a4e686b24"
@@ -47,6 +53,17 @@
   name = "github.com/songtianyi/rrframework"
   packages = ["config","logs","storage"]
   revision = "feb983ace8e14330bba25f268d3c4a235a51b6c2"
+
+[[projects]]
+  name = "github.com/spf13/cobra"
+  packages = ["."]
+  revision = "b26b538f693051ac6518e65672de3144ce3fbedc"
+
+[[projects]]
+  name = "github.com/spf13/pflag"
+  packages = ["."]
+  revision = "e57e3eeb33f795204c1ca35f56c44f83227c6e66"
+  version = "v1.0.0"
 
 [[projects]]
   branch = "master"
@@ -99,6 +116,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "3c83db6c2925c5f2c902adfa9effd1c9a9837b4c1a5c31f4767bb9f321cf1837"
+  inputs-digest = "0314582fc3a84735d790c22b362ba1811acf1728b7675bcb71194a15a1c59359"
   solver-name = "gps-cdcl"
   solver-version = 1
