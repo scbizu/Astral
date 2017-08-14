@@ -2,12 +2,6 @@
 
 
 [[projects]]
-  name = "github.com/astaxie/beego"
-  packages = ["logs"]
-  revision = "cab8458c1c4a5a3b4bf5192922be620e6dede15b"
-  version = "v1.8.3"
-
-[[projects]]
   name = "github.com/cheggaaa/pb"
   packages = ["."]
   revision = "4a1bf7a97d1348c5b50aabf6e1eb0496ca0a3d33"
@@ -45,7 +39,7 @@
 [[projects]]
   branch = "master"
   name = "github.com/scbizu/wechat-go"
-  packages = ["plugins/wxweb/replier","wxweb"]
+  packages = ["wxweb"]
   revision = "a71970e604214be540d32e4b466532cedcc897ad"
 
 [[projects]]
@@ -53,12 +47,6 @@
   name = "github.com/songtianyi/rrframework"
   packages = ["config","logs","storage"]
   revision = "feb983ace8e14330bba25f268d3c4a235a51b6c2"
-
-[[projects]]
-  branch = "master"
-  name = "github.com/songtianyi/wechat-go"
-  packages = ["wxweb"]
-  revision = "391fc31180238986d3a9141e40c497393ce3779f"
 
 [[projects]]
   branch = "master"
@@ -111,6 +99,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "214db8335c6fb8b22984b329b80f72ae9f8d08c6cda3796cb31de2255c8a2348"
+  inputs-digest = "3c83db6c2925c5f2c902adfa9effd1c9a9837b4c1a5c31f4767bb9f321cf1837"
   solver-name = "gps-cdcl"
   solver-version = 1

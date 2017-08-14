@@ -3,6 +3,8 @@ FROM  daocloud.io/library/golang:1.8.1
 
 MAINTAINER scnace "scbizu@gmail.com"
 
-ADD . $GOPATH/src/github.com/scbizu/wxgo
+ADD . $GOPATH/src/github.com/scbizu/Astral
 
-RUN go run $GOPATH/src/github.com/scbizu/wxgo/wx.go
+RUN go install Astral
+
+ENTRYPOINT $GOPATH/bin/Astral
