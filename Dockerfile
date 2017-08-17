@@ -7,4 +7,6 @@ ADD . $GOPATH/src/github.com/scbizu/Astral
 
 RUN cd $GOPATH/src/github.com/scbizu/Astral && go install
 
-ENTRYPOINT $GOPATH/bin/Astral
+ENTRYPOINT $GOPATH/bin/Astral -p
+
+EXPOSE 8080
