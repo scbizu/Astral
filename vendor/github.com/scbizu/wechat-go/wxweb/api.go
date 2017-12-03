@@ -30,6 +30,7 @@ import (
 	"encoding/json"
 	"encoding/xml"
 	"fmt"
+	"github.com/songtianyi/rrframework/config"
 	"io"
 	"io/ioutil"
 	"mime/multipart"
@@ -41,8 +42,6 @@ import (
 	"strings"
 	"sync/atomic"
 	"time"
-
-	"github.com/songtianyi/rrframework/config"
 )
 
 // JsLogin: jslogin api

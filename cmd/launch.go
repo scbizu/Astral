@@ -4,7 +4,8 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/scbizu/Astral/astral-plugin/lunch"
+	"github.com/scbizu/Astral/astral-plugin"
+	"github.com/scbizu/Astral/telegram"
 	"github.com/scbizu/wechat-go/wxweb"
 	"github.com/spf13/cobra"
 )
@@ -20,8 +21,7 @@ func init() {
 
 //LaunchCmd impl Launch Command
 var LaunchCmd = &cobra.Command{
-	Use: "astral",
-	// Aliases: []string{"command"},
+	Use:   "astral",
 	Short: "Launch astral",
 	Long:  "Launch command",
 	Run: func(cmd *cobra.Command, args []string) {
@@ -34,8 +34,14 @@ var LaunchCmd = &cobra.Command{
 		if isHTTP {
 			go http.ListenAndServe(":8080", http.FileServer(http.Dir("./")))
 		}
-		// replier.Register(session, autoReply)
-		lunch.Register(session, nil)
+
+		plugin.RegisterAllEnabledPlugins(session)
+
+		go func() {
+			if err := telegram.PullAndReply(); err != nil {
+				log.Fatal(err)
+			}
+		}()
 
 		if err := session.LoginAndServe(false); err != nil {
 			log.Fatal(err)
@@ -68,9 +74,3 @@ func Execute() (err error) {
 	err = LaunchCmd.Execute()
 	return
 }
-
-// func autoReply(session *wxweb.Session, msg *wxweb.ReceivedMessage) {
-// 	if !msg.IsGroup {
-// 		session.SendText("留言收到了,🐔正在认真搬砖哦~", session.Bot.UserName, msg.FromUserName)
-// 	}
-// }

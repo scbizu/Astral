@@ -1,8 +1,9 @@
 package main
 
 import (
-	"cmd"
 	"log"
+
+	"github.com/scbizu/Astral/cmd"
 )
 
 func main() {

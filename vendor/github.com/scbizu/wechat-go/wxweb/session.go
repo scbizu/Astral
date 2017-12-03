@@ -26,18 +26,17 @@ package wxweb
 
 import (
 	"fmt"
-	"io"
 	"io/ioutil"
 	"net/http"
 	"net/url"
 	"os"
-	"strconv"
 	"strings"
 	"time"
 
 	"github.com/mdp/qrterminal"
 	"github.com/songtianyi/rrframework/config"
 	"github.com/songtianyi/rrframework/logs"
+	"github.com/songtianyi/rrframework/storage"
 )
 
 const (
@@ -68,19 +67,7 @@ var (
 	}
 )
 
-var (
-	//QRCodeBasePath is the qrcode 's base url
-	QRCodeBasePath = os.Getenv("GOPATH") + "/src/github.com/scbizu/Astral/"
-	//QRCodeType is the qrcode img type.
-	QRCodeType = ".jpg"
-)
-
-const (
-	//TempQrcodePath is the qrcode tmp path
-	TempQrcodePath = "./qrcode.jpg"
-)
-
-// Session  wechat bot session
+// Session: wechat bot session
 type Session struct {
 	WxWebCommon     *Common
 	WxWebXcg        *XmlConfig
@@ -126,30 +113,15 @@ func CreateSession(common *Common, handlerRegister *HandlerRegister, qrmode int)
 	if qrmode == TERMINAL_MODE {
 		qrterminal.Generate("https://login.weixin.qq.com/l/"+uuid, qrterminal.L, os.Stdout)
 	} else if qrmode == WEB_MODE {
-		// qrcb, err := QrCode(common, uuid)
-		// if err != nil {
-		// 	return nil, err
-		// }
-		km := url.Values{}
-		km.Add("t", "webwx")
-		km.Add("_", strconv.FormatInt(time.Now().Unix(), 10))
-		uri := common.LoginUrl + "/qrcode/" + uuid + "?" + km.Encode()
-		resp, err := http.Post(uri, "application/octet-stream", nil)
+		qrcb, err := QrCode(common, uuid)
 		if err != nil {
 			return nil, err
 		}
-		defer resp.Body.Close()
-		// code, err := os.Create(QRCodeBasePath + uuid + QRCodeType)
-		code, err := os.Create(TempQrcodePath)
-		if err != nil {
+		ls := rrstorage.CreateLocalDiskStorage("../web/public/qrcode/")
+		if err := ls.Save(qrcb, uuid+".jpg"); err != nil {
 			return nil, err
 		}
-		io.Copy(code, resp.Body)
-		// ls := rrstorage.CreateLocalDiskStorage("../web/public/qrcode/")
-		// if err := ls.Save(qrcb, uuid+".jpg"); err != nil {
-		// 	return nil, err
-		// }
-		session.QrcodePath = QRCodeBasePath + uuid + QRCodeType
+		session.QrcodePath = "../web/public/qrcode/" + uuid + ".jpg"
 	}
 	return session, nil
 }

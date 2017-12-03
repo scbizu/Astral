@@ -27,3 +27,7 @@
 [[override]]
   name = "github.com/spf13/cobra"
   revision = "b26b538f693051ac6518e65672de3144ce3fbedc"
+
+[[constraint]]
+  name = "github.com/go-telegram-bot-api/telegram-bot-api"
+  version = "4.6.1"

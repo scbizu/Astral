@@ -2,7 +2,6 @@ package rrstorage
 
 import (
 	"io/ioutil"
-	"log"
 	"os"
 	"strings"
 )
@@ -16,10 +15,7 @@ type LocalDiskStorage struct {
 func CreateLocalDiskStorage(dir string) StorageWrapper {
 	// create dir
 	if _, err := os.Stat(dir); os.IsNotExist(err) {
-		err = os.MkdirAll(dir, os.ModeDir)
-		if err != nil {
-			log.Panicln(err)
-		}
+		_ = os.MkdirAll(dir, os.ModeDir)
 	}
 	// check dir
 	s := &LocalDiskStorage{
