@@ -5,7 +5,7 @@ import (
 )
 
 const (
-	redisAddr = "localhost:32826"
+	redisAddr = "172.17.0.1:6379"
 	redisPwd  = ""
 )
 
