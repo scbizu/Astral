@@ -26,17 +26,18 @@ package wxweb
 
 import (
 	"fmt"
+	"io"
 	"io/ioutil"
 	"net/http"
 	"net/url"
 	"os"
+	"strconv"
 	"strings"
 	"time"
 
 	"github.com/mdp/qrterminal"
 	"github.com/songtianyi/rrframework/config"
 	"github.com/songtianyi/rrframework/logs"
-	"github.com/songtianyi/rrframework/storage"
 )
 
 const (
@@ -65,6 +66,18 @@ var (
 		{"web2.wechat.com", "file.web2.wechat.com", "webpush.web2.wechat.com"},
 		{"wechat.com", "file.web.wechat.com", "webpush.web.wechat.com"},
 	}
+)
+
+var (
+	//QRCodeBasePath is the qrcode 's base url
+	QRCodeBasePath = os.Getenv("GOPATH") + "/src/github.com/scbizu/Astral/"
+	//QRCodeType is the qrcode img type.
+	QRCodeType = ".jpg"
+)
+
+const (
+	//TempQrcodePath is the qrcode tmp path
+	TempQrcodePath = "./qrcode.jpg"
 )
 
 // Session: wechat bot session
@@ -113,15 +126,23 @@ func CreateSession(common *Common, handlerRegister *HandlerRegister, qrmode int)
 	if qrmode == TERMINAL_MODE {
 		qrterminal.Generate("https://login.weixin.qq.com/l/"+uuid, qrterminal.L, os.Stdout)
 	} else if qrmode == WEB_MODE {
-		qrcb, err := QrCode(common, uuid)
+		km := url.Values{}
+		km.Add("t", "webwx")
+		km.Add("_", strconv.FormatInt(time.Now().Unix(), 10))
+		uri := fmt.Sprintf("%s/qrcode/%s?%s", common.LoginUrl, uuid, km.Encode())
+		resp, err := http.Post(uri, "application/octet-stream", nil)
 		if err != nil {
 			return nil, err
 		}
-		ls := rrstorage.CreateLocalDiskStorage("../web/public/qrcode/")
-		if err := ls.Save(qrcb, uuid+".jpg"); err != nil {
+		defer resp.Body.Close()
+
+		code, err := os.Create(TempQrcodePath)
+		if err != nil {
 			return nil, err
 		}
-		session.QrcodePath = "../web/public/qrcode/" + uuid + ".jpg"
+		io.Copy(code, resp.Body)
+
+		session.QrcodePath = fmt.Sprintf("%s%s%s", QRCodeBasePath, uuid, QRCodeType)
 	}
 	return session, nil
 }

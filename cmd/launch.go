@@ -25,46 +25,29 @@ var LaunchCmd = &cobra.Command{
 	Short: "Launch astral",
 	Long:  "Launch command",
 	Run: func(cmd *cobra.Command, args []string) {
-		session, err := wxweb.CreateSession(nil, nil, wxweb.WEB_MODE)
-		if err != nil {
+
+		if err := telegram.PullAndReply(); err != nil {
 			log.Fatal(err)
-			return
 		}
-
-		if isHTTP {
-			go http.ListenAndServe(":8080", http.FileServer(http.Dir("./")))
-		}
-
-		plugin.RegisterAllEnabledPlugins(session)
-
+		//wechat Launch in a go routine
 		go func() {
-			if err := telegram.PullAndReply(); err != nil {
-				log.Fatal(err)
+			session, err := wxweb.CreateSession(nil, nil, wxweb.WEB_MODE)
+			if err != nil {
+				log.Printf("create wechat session failed:%s", err.Error())
+				return
+			}
+
+			if isHTTP {
+				go http.ListenAndServe(":8080", http.FileServer(http.Dir("./")))
+			}
+
+			plugin.RegisterAllEnabledPlugins(session)
+
+			if err := session.LoginAndServe(false); err != nil {
+				log.Printf("wechat listener has an error:%s", err.Error())
 			}
 		}()
 
-		if err := session.LoginAndServe(false); err != nil {
-			log.Fatal(err)
-		}
-		// for {
-		// 	if err := session.LoginAndServe(false); err != nil {
-		// 		logs.Error("session exit, %s", err)
-		// 		for i := 0; i < 3; i++ {
-		// 			logs.Info("trying re-login with cache")
-		// 			if err := session.LoginAndServe(true); err != nil {
-		// 				logs.Error("re-login error, %s", err)
-		// 			}
-		// 			time.Sleep(3 * time.Second)
-		// 		}
-		// 		if session, err = wxweb.CreateSession(nil, session.HandlerRegister, wxweb.TERMINAL_MODE); err != nil {
-		// 			logs.Error("create new sesion failed, %s", err)
-		// 			break
-		// 		}
-		// 	} else {
-		// 		logs.Info("closed by user")
-		// 		break
-		// 	}
-		// }
 		return
 	},
 }
