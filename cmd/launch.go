@@ -26,9 +26,14 @@ var LaunchCmd = &cobra.Command{
 	Long:  "Launch command",
 	Run: func(cmd *cobra.Command, args []string) {
 
-		if err := telegram.PullAndReply(); err != nil {
+		// if err := telegram.PullAndReply(); err != nil {
+		// 	log.Fatal(err)
+		// }
+
+		if err := telegram.ListenWebHook(true); err != nil {
 			log.Fatal(err)
 		}
+
 		//wechat Launch in a go routine
 		go func() {
 			session, err := wxweb.CreateSession(nil, nil, wxweb.WEB_MODE)
