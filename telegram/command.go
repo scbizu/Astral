@@ -1,6 +1,6 @@
 package telegram
 
 const (
-	//CommandHello == /hello
-	CommandHello = "hello"
+	//CommandSayhi == /sayhi
+	CommandSayhi = "sayhi"
 )

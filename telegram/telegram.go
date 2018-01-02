@@ -17,6 +17,7 @@ import (
 const (
 	tokenKey    = "tg_token"
 	tgAPIDomain = "https://scnace.cc:443/"
+	masterName  = "scnace"
 )
 
 var (
@@ -63,7 +64,7 @@ func PullAndReply() (err error) {
 			continue
 		}
 
-		if update.Message.Command() == CommandHello {
+		if update.Message.Command() == CommandSayhi {
 			if update.Message.CommandArguments() == "" {
 				return errEmptyArgs
 			}
@@ -113,10 +114,19 @@ func ListenWebHook(debug bool) (err error) {
 		if update.Message == nil {
 			continue
 		}
-
-		msg := tgbotapi.NewMessage(update.Message.Chat.ID, update.Message.Text)
+		var msg tgbotapi.MessageConfig
+		switch update.Message.Command() {
+		case CommandSayhi:
+			user := update.Message.From.UserName
+			if user == masterName {
+				user = "master"
+			}
+			msg = tgbotapi.NewMessage(update.Message.Chat.ID, fmt.Sprintf("hi,%s", user))
+		}
+		if msg.Text == "" || msg.ChatID == 0 {
+			msg = tgbotapi.NewMessage(update.Message.Chat.ID, update.Message.Text)
+		}
 		msg.ReplyToMessageID = update.Message.MessageID
-
 		bot.Send(msg)
 	}
 
