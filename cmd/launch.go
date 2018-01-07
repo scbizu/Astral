@@ -46,7 +46,7 @@ var LaunchCmd = &cobra.Command{
 				go http.ListenAndServe(":8080", http.FileServer(http.Dir("./")))
 			}
 
-			plugin.RegisterAllEnabledPlugins(session)
+			plugin.RegisterWechatEnabledPlugins(session)
 
 			if err := session.LoginAndServe(false); err != nil {
 				log.Printf("wechat listener has an error:%s", err.Error())
