@@ -24,7 +24,7 @@ const (
 	//CommandSayhi == /sayhi
 	CommandSayhi CommanderName = "sayhi"
 	//CommandTodayAnime == /today_anime,combine all animes from all srcs.
-	CommandTodayAnime CommanderName = "today_anime"
+	CommandTodayAnime CommanderName = "todayanime"
 )
 
 //DefaultBehavior defines the  default behavior of commander
