@@ -23,6 +23,7 @@ func RegistTGEnabledPlugins(rawmsg *tgbotapi.Message) (msg tgbotapi.MessageConfi
 	// 	return
 	// }
 	msg = anime.Register(rawmsg)
+	log.Println(msg.ChatID, msg.Text)
 	return
 }
 
