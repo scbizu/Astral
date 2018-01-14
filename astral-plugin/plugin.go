@@ -1,6 +1,8 @@
 package plugin
 
 import (
+	"log"
+
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 	"github.com/scbizu/Astral/astral-plugin/lunch"
 	"github.com/scbizu/Astral/astral-plugin/sayhi"
@@ -26,7 +28,8 @@ func RegistTGEnabledPlugins(rawmsg *tgbotapi.Message) (msg tgbotapi.MessageConfi
 }
 
 func checkMarkedMsg(msg tgbotapi.MessageConfig) bool {
-	if msg.ChatID != 0 {
+	log.Printf("[check chatid]:%d,[check msgText]:%s", msg.ChatID, msg.Text)
+	if msg.ChatID != 0 && msg.Text != "" {
 		return true
 	}
 	return false
