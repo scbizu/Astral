@@ -2,6 +2,18 @@
 
 
 [[projects]]
+  name = "github.com/PuerkitoBio/goquery"
+  packages = ["."]
+  revision = "e1271ee34c6a305e38566ecd27ae374944907ee9"
+  version = "v1.1.0"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/andybalholm/cascadia"
+  packages = ["."]
+  revision = "349dd0209470eabd9514242c688c403c0926d266"
+
+[[projects]]
   name = "github.com/go-redis/redis"
   packages = [".","internal","internal/consistenthash","internal/hashtag","internal/pool","internal/proto"]
   revision = "9c885d5ba8a22f260badcffde1649915fbeebfc0"
@@ -69,12 +81,12 @@
 [[projects]]
   branch = "master"
   name = "golang.org/x/net"
-  packages = ["websocket"]
+  packages = ["html","html/atom","websocket"]
   revision = "d866cfc389cec985d6fda2859936a575a55a3ab6"
 
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "616398367d1c31199c57535c9e641ba7418ec4e8adac488c8436140c75321781"
+  inputs-digest = "5b282ca3a690dc5ad8db538be9a4321a3498c8e55a5430f627c11e692dc4fa25"
   solver-name = "gps-cdcl"
   solver-version = 1
