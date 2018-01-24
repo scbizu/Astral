@@ -118,7 +118,11 @@ func scrapeBilibiliTimeline(src *url.URL) ([]*SrcObj, error) {
 		return nil, err
 	}
 	var objs []*SrcObj
-	doc.Find(".timeline-body .day-wrap current .day-body").Each(func(index int, s *goquery.Selection) {
+	log.Print("fetching...")
+	content, _ := doc.Find("body").Html()
+	log.Print(content)
+	doc.Find(".day-wrap current").Each(func(index int, s *goquery.Selection) {
+		log.Print(index)
 		obj := new(SrcObj)
 		obj.Src = "bilibili"
 		link, _ := s.Find(".tl-body a").Eq(1).Attr("href")

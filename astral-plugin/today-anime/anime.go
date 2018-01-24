@@ -28,6 +28,9 @@ func Register(msg *tgbotapi.Message) tgbotapi.MessageConfig {
 			allmsg.WriteString(info.FormatLinkInMarkdownPreview())
 			allmsg.WriteByte('\n')
 		}
+		if len(animeInfo) == 0 {
+			allmsg.WriteString("nothing update today.")
+		}
 		log.Printf("all anime msg:%s", allmsg.String())
 		return tgbotapi.MessageConfig{
 			BaseChat: tgbotapi.BaseChat{
