@@ -3,6 +3,7 @@ package anime
 import (
 	"bytes"
 	"fmt"
+	"log"
 	"time"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
@@ -26,7 +27,7 @@ func Register(msg *tgbotapi.Message) tgbotapi.MessageConfig {
 			allmsg.WriteString(info.FormatLinkInMarkdownPreview())
 			allmsg.WriteByte('\n')
 		}
-
+		log.Printf("all anime msg:%s", allmsg.String())
 		return tgbotapi.MessageConfig{
 			BaseChat: tgbotapi.BaseChat{
 				ChatID:           msg.Chat.ID,
