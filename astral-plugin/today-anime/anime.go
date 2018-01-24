@@ -17,6 +17,7 @@ func getCurrentDay() time.Weekday {
 //Register regists anime plugin
 func Register(msg *tgbotapi.Message) tgbotapi.MessageConfig {
 	handler := func(msg *tgbotapi.Message) tgbotapi.MessageConfig {
+		log.Printf("fetching anime")
 		animeInfo, err := GetAllAnimes()
 		if err != nil {
 			asError := fmt.Errorf("astral has an error:[%s]", err.Error())
