@@ -3,6 +3,7 @@ package command
 import (
 	"fmt"
 	"log"
+	"sync"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 )
@@ -25,7 +26,11 @@ const (
 	CommandSayhi CommanderName = "sayhi"
 	//CommandTodayAnime == /today_anime,combine all animes from all srcs.
 	CommandTodayAnime CommanderName = "todayanime"
+	//CommandShowAllCommand makes py with @botfather
+	CommandShowAllCommand CommanderName = "show_commands"
 )
+
+var allCommandsMapping *sync.Map
 
 //DefaultBehavior defines the  default behavior of commander
 var DefaultBehavior = func(msg *tgbotapi.Message) tgbotapi.MessageConfig {
@@ -33,16 +38,23 @@ var DefaultBehavior = func(msg *tgbotapi.Message) tgbotapi.MessageConfig {
 	return tgbotapi.NewMessage(msg.Chat.ID, defaultText)
 }
 
+func init() {
+	allCommandsMapping = new(sync.Map)
+}
+
 //NewCommand init a command
 func NewCommand(name CommanderName, u string, handler Handler) *Commander {
 	if handler == nil {
-
+		handler = DefaultBehavior
 	}
-	return &Commander{
+	c := &Commander{
 		Name:     name,
 		Usage:    u,
 		behavior: handler,
 	}
+	setCommand(c)
+
+	return c
 }
 
 //Do will run the command behavior
@@ -51,8 +63,21 @@ func (c *Commander) Do(msg *tgbotapi.Message) tgbotapi.MessageConfig {
 		log.Printf("%s skiped command %s", msg.Command(), string(c.Name))
 		return tgbotapi.MessageConfig{}
 	}
-	if c.behavior == nil {
-		c.behavior = DefaultBehavior
-	}
 	return c.behavior(msg)
+}
+
+func setCommand(command *Commander) {
+	allCommandsMapping.Store(command.Name, command)
+}
+
+//GetAllCommands gets all commands name
+func GetAllCommands() (commands []*Commander) {
+	allCommandsMapping.Range(func(key interface{}, value interface{}) bool {
+		if _, ok := value.(*Commander); !ok {
+			return false
+		}
+		commands = append(commands, value.(*Commander))
+		return true
+	})
+	return
 }
