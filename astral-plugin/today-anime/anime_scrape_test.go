@@ -17,6 +17,6 @@ func TestScrapeBilibiliTimeline(t *testing.T) {
 		return
 	}
 	for _, info := range infos {
-		t.Logf("AnimeName:%s", info.BangumiName)
+		t.Logf("AnimeName:%s", info.Link)
 	}
 }

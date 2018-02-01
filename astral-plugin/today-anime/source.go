@@ -89,7 +89,10 @@ const (
 func (s *SrcObj) FormatLinkInMarkdownPreview() string {
 	name := fmt.Sprintf("[%s From %s]", s.BangumiName, s.Src)
 	linkstr := fmt.Sprintf("(%s)", s.Link.String())
-	return fmt.Sprintf("%s%s", name, linkstr)
+	if s.Pubed {
+		return fmt.Sprintf("%s%s", name, linkstr)
+	}
+	return fmt.Sprintf("%s From %s(未更新)", s.BangumiName, s.Src)
 }
 
 //GetAllAnimes gets all animes from all src defined.
@@ -192,9 +195,12 @@ func scrapeBilibiliTimeline(src *url.URL) ([]*SrcObj, error) {
 			continue
 		}
 		for _, s := range r.Seasons {
+			if s.Delay == 1 {
+				continue
+			}
 			obj := new(SrcObj)
 			obj.BangumiName = s.Title
-			obj.Link, err = formatNotAbsoluteLink("https://bangumi.bilibili.com/anime/",
+			obj.Link, err = formatNotAbsoluteLink("https://www.bilibili.com/bangumi/play/ep",
 				strconv.Itoa(s.EpID))
 			if err != nil {
 				return nil, err
