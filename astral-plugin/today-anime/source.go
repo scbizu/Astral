@@ -1,13 +1,72 @@
 package anime
 
 import (
+	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"log"
+	"net/http"
 	"net/url"
+	"strconv"
 	"strings"
 
 	"github.com/PuerkitoBio/goquery"
 )
+
+//TimeLine defines bilibili's timeline
+type TimeLine struct {
+	Code    int    `json:"code"`
+	Message string `json:"message"`
+	Result  []struct {
+		Date      string `json:"date"`
+		DateTs    int    `json:"date_ts"`
+		DayOfWeek int    `json:"day_of_week"`
+		IsToday   int    `json:"is_today"`
+		Seasons   []struct {
+			Cover        string `json:"cover"`
+			Delay        int    `json:"delay"`
+			EpID         int    `json:"ep_id"`
+			Favorites    int    `json:"favorites"`
+			Follow       int    `json:"follow"`
+			IsPublished  int    `json:"is_published"`
+			PubIndex     string `json:"pub_index"`
+			PubTime      string `json:"pub_time"`
+			PubTs        int    `json:"pub_ts"`
+			SeasonID     int    `json:"season_id"`
+			SeasonStatus int    `json:"season_status"`
+			SquareCover  string `json:"square_cover"`
+			Title        string `json:"title"`
+			Badge        string `json:"badge,omitempty"`
+		} `json:"seasons"`
+	} `json:"result"`
+}
+
+//TimeLineCN defines 国创 timeline
+type TimeLineCN struct {
+	Code    int    `json:"code"`
+	Message string `json:"message"`
+	Result  []struct {
+		Date      string `json:"date"`
+		DateTs    int    `json:"date_ts"`
+		DayOfWeek int    `json:"day_of_week"`
+		IsToday   int    `json:"is_today"`
+		Seasons   []struct {
+			Cover        string `json:"cover"`
+			Delay        int    `json:"delay"`
+			EpID         int    `json:"ep_id"`
+			Favorites    int    `json:"favorites"`
+			Follow       int    `json:"follow"`
+			IsPublished  int    `json:"is_published"`
+			PubIndex     string `json:"pub_index"`
+			PubTime      string `json:"pub_time"`
+			PubTs        int    `json:"pub_ts"`
+			SeasonID     int    `json:"season_id"`
+			SeasonStatus int    `json:"season_status"`
+			SquareCover  string `json:"square_cover"`
+			Title        string `json:"title"`
+		} `json:"seasons"`
+	} `json:"result"`
+}
 
 //SrcObj defines bangumi obj
 type SrcObj struct {
@@ -19,9 +78,9 @@ type SrcObj struct {
 
 const (
 	//BilibiliGC B站国创
-	BilibiliGC = "https://bangumi.bilibili.com/guochuang/timeline"
+	BilibiliGC = "https://bangumi.bilibili.com/web_api/timeline_cn"
 	//BilibiliJP B站日漫
-	BilibiliJP = "https://bangumi.bilibili.com/anime/timeline"
+	BilibiliJP = "https://bangumi.bilibili.com/web_api/timeline_global"
 	//Dilidili D站动漫
 	Dilidili = "http://www.dilidili.wang"
 )
@@ -113,32 +172,39 @@ func formatNotAbsoluteLink(rawlink string, src string) (resLink *url.URL, err er
 }
 
 func scrapeBilibiliTimeline(src *url.URL) ([]*SrcObj, error) {
-	doc, err := goquery.NewDocument(src.String())
+	req, err := http.Get(src.String())
 	if err != nil {
 		return nil, err
 	}
 	var objs []*SrcObj
-	log.Print("fetching...")
-	content, _ := doc.Find("body").Html()
-	log.Print(content)
-	doc.Find(".day-wrap current").Each(func(index int, s *goquery.Selection) {
-		log.Print(index)
-		obj := new(SrcObj)
-		obj.Src = "bilibili"
-		link, _ := s.Find(".tl-body a").Eq(1).Attr("href")
-		obj.Link, err = formatLink(link)
-		if err != nil {
-			log.Printf("format bilibili url error:%s", err.Error())
+	body, err := ioutil.ReadAll(req.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	tl := new(TimeLine)
+	err = json.Unmarshal(body, tl)
+	if err != nil {
+		return nil, err
+	}
+	for _, r := range tl.Result {
+		if r.IsToday == 0 {
+			continue
 		}
-		obj.BangumiName, _ = s.Find(".tl-body a").Eq(1).Attr("title")
-		pubstr := s.Find(".tl-body a").Eq(1).Find(".published").Text()
-		if pubstr == "" {
-			obj.Pubed = false
-		} else {
-			obj.Pubed = true
+		for _, s := range r.Seasons {
+			obj := new(SrcObj)
+			obj.BangumiName = s.Title
+			obj.Link, err = formatNotAbsoluteLink("https://bangumi.bilibili.com/anime/",
+				strconv.Itoa(s.EpID))
+			if err != nil {
+				return nil, err
+			}
+			obj.Pubed = s.IsPublished > 0
+			obj.Src = "bilibili"
+			objs = append(objs, obj)
 		}
-		objs = append(objs, obj)
-	})
+	}
+
 	return objs, nil
 }
 

@@ -24,11 +24,13 @@ func RegistTGEnabledPlugins(rawmsg *tgbotapi.Message) (msg tgbotapi.MessageConfi
 	if checkMarkedMsg(msg) {
 		return
 	}
-	msg = py.Register(rawmsg)
+
+	msg = anime.Register(rawmsg)
 	if checkMarkedMsg(msg) {
 		return
 	}
-	msg = anime.Register(rawmsg)
+
+	msg = py.Register(rawmsg)
 	log.Println(msg.ChatID, msg.Text)
 	return
 }
