@@ -9,7 +9,7 @@ import (
 
 const (
 	tokenKey    = "BOTKEY"
-	tgAPIDomain = "https://scnace.me:443/"
+	tgAPIDomain = "https://api.scnace.me:443/"
 )
 
 var (
