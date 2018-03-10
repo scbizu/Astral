@@ -41,7 +41,7 @@ func Register(msg *tgbotapi.Message) tgbotapi.MessageConfig {
 			ParseMode: tgbotapi.ModeMarkdown,
 		}
 	}
-	commandDetails := "fetch all anime today!"
+	commandDetails := "fetch all anime today!TIPS:D站为了保持一致,默认全部已更新"
 	todayAnime := command.NewCommand(command.CommandTodayAnime, commandDetails, handler)
 	return todayAnime.Do(msg)
 }

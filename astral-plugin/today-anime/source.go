@@ -9,6 +9,7 @@ import (
 	"net/url"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/PuerkitoBio/goquery"
 )
@@ -169,7 +170,7 @@ func formatLink(rawLink string) (resLink *url.URL, err error) {
 }
 
 func formatNotAbsoluteLink(rawlink string, src string) (resLink *url.URL, err error) {
-	resURL := fmt.Sprintf("%s%s", rawlink, src)
+	resURL := fmt.Sprintf("%s%s", src, rawlink)
 	resLink, err = url.Parse(resURL)
 	return
 }
@@ -200,8 +201,8 @@ func scrapeBilibiliTimeline(src *url.URL) ([]*SrcObj, error) {
 			}
 			obj := new(SrcObj)
 			obj.BangumiName = s.Title
-			obj.Link, err = formatNotAbsoluteLink("https://www.bilibili.com/bangumi/play/ep",
-				strconv.Itoa(s.EpID))
+			obj.Link, err = formatNotAbsoluteLink(strconv.Itoa(s.EpID),
+				"https://www.bilibili.com/bangumi/play/ep")
 			if err != nil {
 				return nil, err
 			}
@@ -220,12 +221,14 @@ func scrapeDilidiliTimeLine(src *url.URL) ([]*SrcObj, error) {
 		return nil, err
 	}
 	var objs []*SrcObj
+	today := convert2CNWeekDay(int(time.Now().Weekday()))
+	// log.Println(doc.Find(".container-row-1").Find(".two-auto").Find("ul").Find(''))
 
-	doc.Find(".container-row-1 update .two-auto ul").Each(func(index int, s *goquery.Selection) {
-		v, _ := s.Attr("style")
-		if v == "display: block" {
-			s.Find(".tooltip tooltipstered").Each(func(cindex int, cs *goquery.Selection) {
-				ele := cs.Find(".update-content h4 a")
+	doc.Find(".container-row-1").Find(".two-auto").Find("ul").Each(func(index int, s *goquery.Selection) {
+		// log.Printf("inter:%d,cn:%d", int(time.Now().Weekday()), convert2CNWeekDay(int(time.Now().Weekday())))
+		if index == today {
+			s.Find("li").Each(func(cindex int, cs *goquery.Selection) {
+				ele := cs.Find(".update-content").Find("h4").Find("a")
 				obj := new(SrcObj)
 				obj.Src = "dilidili"
 				obj.BangumiName = ele.Text()
@@ -235,10 +238,22 @@ func scrapeDilidiliTimeLine(src *url.URL) ([]*SrcObj, error) {
 				if err != nil {
 					log.Printf("format dilidili url error:%s", err.Error())
 				}
-				obj.Pubed = false
+				obj.Pubed = true
 				objs = append(objs, obj)
 			})
 		}
 	})
 	return objs, nil
+}
+
+//weekday internationalWeekday    cnWeekday
+//Sun     0      6
+//Mon     1      0
+//Tue     2      1
+//Wed     3      2
+//Thu     4      3
+//Fri     5      4
+//Sat     6      5
+func convert2CNWeekDay(internationWeekday int) (cnWeekday int) {
+	return (internationWeekday + 6) % 7
 }
