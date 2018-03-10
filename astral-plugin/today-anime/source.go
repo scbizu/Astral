@@ -221,7 +221,12 @@ func scrapeDilidiliTimeLine(src *url.URL) ([]*SrcObj, error) {
 		return nil, err
 	}
 	var objs []*SrcObj
-	today := convert2CNWeekDay(int(time.Now().Weekday()))
+	location, err := time.LoadLocation("Asia/Shanghai")
+	if err != nil {
+		return nil, err
+	}
+
+	today := convert2CNWeekDay(int(time.Now().In(location).Weekday()))
 	// log.Println(doc.Find(".container-row-1").Find(".two-auto").Find("ul").Find(''))
 
 	doc.Find(".container-row-1").Find(".two-auto").Find("ul").Each(func(index int, s *goquery.Selection) {
