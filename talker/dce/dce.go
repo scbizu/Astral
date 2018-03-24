@@ -3,7 +3,6 @@ package dce
 
 import (
 	"encoding/json"
-	"time"
 )
 
 const (
@@ -33,7 +32,7 @@ type DCE struct {
 		Branch          interface{} `json:"branch"`
 		PullRequest     string      `json:"pull_request"`
 		Message         string      `json:"message"`
-		StartedAt       time.Time   `json:"started_at"`
+		StartedAt       string      `json:"started_at"`
 		BuildType       string      `json:"build_type"`
 	} `json:"build"`
 }
