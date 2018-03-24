@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strings"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 	plugin "github.com/scbizu/Astral/astral-plugin"
@@ -46,24 +47,28 @@ func ListenWebHook(debug bool) (err error) {
 	port := fmt.Sprintf(":%s", os.Getenv("LISTENPORT"))
 
 	go func(bot *tgbotapi.BotAPI) {
-		http.HandleFunc("/dce", func(w http.ResponseWriter, r *http.Request) {
-			r.ParseForm()
-			body, err := ioutil.ReadAll(r.Body)
-			if err != nil {
-				log.Println(err)
-				w.WriteHeader(http.StatusInternalServerError)
-				w.Write([]byte(err.Error()))
+		http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+			if strings.Contains(r.URL.Path, "/dce") {
+				r.ParseForm()
+				body, err := ioutil.ReadAll(r.Body)
+				if err != nil {
+					log.Println(err)
+					w.WriteHeader(http.StatusInternalServerError)
+					w.Write([]byte(err.Error()))
+				}
+				log.Printf("Req Body:%v", string(body))
+
+				defer r.Body.Close()
+				dceObj, err := dce.NewDCEObj(string(body))
+				if err != nil {
+					log.Println(err)
+					w.WriteHeader(http.StatusInternalServerError)
+					w.Write([]byte(err.Error()))
+				}
+				noti := talker.NewNotifaction(dceObj.GetRepoName(),
+					dceObj.GetStageMap(), dceObj.GetCommitMsg())
+				bot.Send(noti.Notify())
 			}
-			defer r.Body.Close()
-			dceObj, err := dce.NewDCEObj(string(body))
-			if err != nil {
-				log.Println(err)
-				w.WriteHeader(http.StatusInternalServerError)
-				w.Write([]byte(err.Error()))
-			}
-			noti := talker.NewNotifaction(dceObj.GetRepoName(),
-				dceObj.GetStageMap(), dceObj.GetCommitMsg())
-			bot.Send(noti.Notify())
 		})
 		http.ListenAndServe(port, nil)
 	}(bot)
