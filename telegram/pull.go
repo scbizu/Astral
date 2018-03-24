@@ -8,7 +8,7 @@ import (
 
 //PullAndReply pull the msg (long polling) and response
 func PullAndReply() (err error) {
-	bot, err := connectTG()
+	bot, err := ConnectTG()
 	if err != nil {
 		return
 	}

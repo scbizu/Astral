@@ -2,6 +2,7 @@ package telegram
 
 import (
 	"fmt"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
@@ -9,11 +10,13 @@ import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 	plugin "github.com/scbizu/Astral/astral-plugin"
 	"github.com/scbizu/Astral/getcert"
+	"github.com/scbizu/Astral/talker"
+	"github.com/scbizu/Astral/talker/dce"
 )
 
 //ListenWebHook is the tg api webhook mode
 func ListenWebHook(debug bool) (err error) {
-	bot, err := connectTG()
+	bot, err := ConnectTG()
 	if err != nil {
 		return
 	}
@@ -31,8 +34,9 @@ func ListenWebHook(debug bool) (err error) {
 
 	info, err := bot.GetWebhookInfo()
 	if err != nil {
-		log.Panicln(err)
+		return err
 	}
+
 	log.Println(info.LastErrorMessage, info.LastErrorDate)
 
 	pattern := fmt.Sprintf("/%s", token)
@@ -41,7 +45,28 @@ func ListenWebHook(debug bool) (err error) {
 
 	port := fmt.Sprintf(":%s", os.Getenv("LISTENPORT"))
 
-	go http.ListenAndServe(port, nil)
+	go func(bot *tgbotapi.BotAPI) {
+		http.HandleFunc("/dce", func(w http.ResponseWriter, r *http.Request) {
+			r.ParseForm()
+			body, err := ioutil.ReadAll(r.Body)
+			if err != nil {
+				log.Println(err)
+				w.WriteHeader(http.StatusInternalServerError)
+				w.Write([]byte(err.Error()))
+			}
+			defer r.Body.Close()
+			dceObj, err := dce.NewDCEObj(string(body))
+			if err != nil {
+				log.Println(err)
+				w.WriteHeader(http.StatusInternalServerError)
+				w.Write([]byte(err.Error()))
+			}
+			noti := talker.NewNotifaction(dceObj.GetRepoName(),
+				dceObj.GetStageMap(), dceObj.GetCommitMsg())
+			bot.Send(noti.Notify())
+		})
+		http.ListenAndServe(port, nil)
+	}(bot)
 
 	for update := range updatesMsgChannel {
 		log.Printf("[raw msg]:%+v\n", update)

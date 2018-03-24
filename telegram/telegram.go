@@ -21,6 +21,7 @@ func init() {
 	token = os.Getenv(tokenKey)
 }
 
-func connectTG() (bot *tgbotapi.BotAPI, err error) {
+// ConnectTG returns the bot instance
+func ConnectTG() (bot *tgbotapi.BotAPI, err error) {
 	return tgbotapi.NewBotAPI(token)
 }
