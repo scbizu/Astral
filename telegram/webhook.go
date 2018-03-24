@@ -51,6 +51,7 @@ func ListenWebHook(debug bool) (err error) {
 				log.Println(err)
 				w.WriteHeader(http.StatusInternalServerError)
 				w.Write([]byte(err.Error()))
+				return
 			}
 			log.Printf("Req Body:%v", string(body))
 
@@ -60,6 +61,7 @@ func ListenWebHook(debug bool) (err error) {
 				log.Println(err)
 				w.WriteHeader(http.StatusInternalServerError)
 				w.Write([]byte(err.Error()))
+				return
 			}
 			noti := talker.NewNotifaction(dceObj.GetRepoName(),
 				dceObj.GetStageMap(), dceObj.GetCommitMsg())
