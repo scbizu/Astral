@@ -24,7 +24,7 @@ const (
 
 const (
 	// BuildBotName defines the bot name
-	BuildBotName = "Astral Server Notification"
+	BuildBotName = "1378084890"
 )
 
 // NewNotifaction init the Notifaction instance

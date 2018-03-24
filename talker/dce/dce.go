@@ -40,7 +40,7 @@ type DCE struct {
 // NewDCEObj init the dce callback obj
 func NewDCEObj(str string) (*DCE, error) {
 	d := new(DCE)
-	if err := json.Unmarshal([]byte(str), &d); err != nil {
+	if err := json.Unmarshal([]byte(str), d); err != nil {
 		return nil, err
 	}
 	return d, nil
