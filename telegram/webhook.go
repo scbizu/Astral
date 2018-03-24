@@ -44,7 +44,7 @@ func ListenWebHook(debug bool) (err error) {
 	log.Printf("msg in channel:%d", len(updatesMsgChannel))
 
 	dceListenHandler := func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == "POST" {
+		if r.Method == http.MethodPost {
 			r.ParseForm()
 			body, err := ioutil.ReadAll(r.Body)
 			if err != nil {
@@ -64,6 +64,8 @@ func ListenWebHook(debug bool) (err error) {
 			noti := talker.NewNotifaction(dceObj.GetRepoName(),
 				dceObj.GetStageMap(), dceObj.GetCommitMsg())
 			bot.Send(noti.Notify())
+			w.WriteHeader(http.StatusOK)
+			w.Write([]byte{})
 		} else {
 			w.WriteHeader(http.StatusForbidden)
 			w.Write([]byte("Astral denied your request"))
