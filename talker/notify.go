@@ -27,6 +27,8 @@ const (
 	// Hacked this on the web client
 	// Regex format: *c(.*)_*
 	ChannelChatID = 1378084890
+	// ChannelName defines build/deploy channel name
+	ChannelName = "AstralBuildNotifaction"
 )
 
 // NewNotifaction init the Notifaction instance
@@ -50,5 +52,5 @@ func NewNotifaction(repo string, stage map[string]bool, commit string) *Notifact
 // Notify sends the msg to the tg channel
 func (n *Notifaction) Notify() tgbotapi.MessageConfig {
 	text := fmt.Sprintf("%s:%v", n.commitNotes, n.isBuildSucceed)
-	return tgbotapi.NewMessage(ChannelChatID, text)
+	return tgbotapi.NewMessageToChannel(ChannelName, text)
 }

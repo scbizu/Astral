@@ -65,9 +65,15 @@ func ListenWebHook(debug bool) (err error) {
 			}
 			noti := talker.NewNotifaction(dceObj.GetRepoName(),
 				dceObj.GetStageMap(), dceObj.GetCommitMsg())
-			bot.Send(noti.Notify())
+			respMsg, err := bot.Send(noti.Notify())
+			if err != nil {
+				log.Println(err)
+				w.WriteHeader(http.StatusBadRequest)
+				w.Write([]byte(err.Error()))
+			}
+
 			w.WriteHeader(http.StatusOK)
-			w.Write([]byte{})
+			w.Write([]byte(respMsg.Text))
 		} else {
 			w.WriteHeader(http.StatusForbidden)
 			w.Write([]byte("Astral denied your request"))
