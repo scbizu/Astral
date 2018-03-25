@@ -3,7 +3,7 @@ package talker
 import (
 	"fmt"
 
-	"github.com/go-telegram-bot-api/telegram-bot-api"
+	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 )
 
 // Notifaction new the notifaction object
@@ -28,7 +28,7 @@ const (
 	// Regex format: *c(.*)_*
 	ChannelChatID = 1378084890
 	// ChannelName defines build/deploy channel name
-	ChannelName = "AstralBuildNotifaction"
+	ChannelName = "@AstralServerNotifaction"
 )
 
 // NewNotifaction init the Notifaction instance

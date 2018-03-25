@@ -70,6 +70,7 @@ func ListenWebHook(debug bool) (err error) {
 				log.Println(err)
 				w.WriteHeader(http.StatusBadRequest)
 				w.Write([]byte(err.Error()))
+				return
 			}
 
 			w.WriteHeader(http.StatusOK)
