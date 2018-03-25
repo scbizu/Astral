@@ -4,20 +4,20 @@
 [[projects]]
   name = "github.com/PuerkitoBio/goquery"
   packages = ["."]
-  revision = "e1271ee34c6a305e38566ecd27ae374944907ee9"
-  version = "v1.1.0"
+  revision = "a86ea073017a6beddef78c8659e7224e8ca634b0"
+  version = "v1.4.0"
 
 [[projects]]
-  branch = "master"
   name = "github.com/andybalholm/cascadia"
   packages = ["."]
-  revision = "349dd0209470eabd9514242c688c403c0926d266"
+  revision = "901648c87902174f774fac311d7f176f8647bdaa"
+  version = "v1.0.0"
 
 [[projects]]
   name = "github.com/go-redis/redis"
-  packages = [".","internal","internal/consistenthash","internal/hashtag","internal/pool","internal/proto"]
-  revision = "9c885d5ba8a22f260badcffde1649915fbeebfc0"
-  version = "v6.7.5"
+  packages = [".","internal","internal/consistenthash","internal/hashtag","internal/pool","internal/proto","internal/singleflight","internal/util"]
+  revision = "877867d2845fbaf86798befe410b6ceb6f5c29a3"
+  version = "v6.10.2"
 
 [[projects]]
   name = "github.com/go-telegram-bot-api/telegram-bot-api"
@@ -26,10 +26,10 @@
   version = "v4.6.1"
 
 [[projects]]
-  branch = "v2"
   name = "github.com/go-yaml/yaml"
   packages = ["."]
-  revision = "287cf08546ab5e7e37d55a84f7ed3fd1db036de5"
+  revision = "7f97868eec74b32b0982dd158a51a446d1da7eb5"
+  version = "v2.1.1"
 
 [[projects]]
   name = "github.com/inconshreveable/mousetrap"
@@ -59,7 +59,7 @@
   branch = "master"
   name = "github.com/songtianyi/rrframework"
   packages = ["config","logs"]
-  revision = "feb983ace8e14330bba25f268d3c4a235a51b6c2"
+  revision = "968f81daa2c82ed88b6cf4fc583b45407d32013c"
 
 [[projects]]
   name = "github.com/spf13/cobra"
@@ -82,7 +82,7 @@
   branch = "master"
   name = "golang.org/x/net"
   packages = ["html","html/atom","websocket"]
-  revision = "d866cfc389cec985d6fda2859936a575a55a3ab6"
+  revision = "6078986fec03a1dcc236c34816c71b0e05018fda"
 
 [solve-meta]
   analyzer-name = "dep"
