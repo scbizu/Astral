@@ -24,10 +24,6 @@ const (
 )
 
 const (
-	// ChannelChatID defines the bot name
-	// Hacked this on the web client
-	// Regex format: *c(.*)_*
-	ChannelChatID = 1378084890
 	// ChannelName defines build/deploy channel name
 	ChannelName = "@AstralServerNotifaction"
 )
@@ -61,7 +57,7 @@ func (n *Notifaction) Notify() tgbotapi.MessageConfig {
 	text = fmt.Sprintf("%s\n **Test Status**: `%v`", text, n.testStatus)
 	text = fmt.Sprintf("%s\n **Build Status**: `%v`", text, n.buildStatus)
 	text = fmt.Sprintf("%s\n **Deploy Status**: `%v`", text, n.depolyStatus)
-	text = fmt.Sprintf("%s\n **Duration**: `%v`", text, n.duration)
+	text = fmt.Sprintf("%s\n **Duration**: `%v s`", text, n.duration)
 	return tgbotapi.MessageConfig{
 		BaseChat: tgbotapi.BaseChat{
 			ChannelUsername: ChannelName,
