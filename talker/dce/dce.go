@@ -67,10 +67,10 @@ func (d *DCE) GetSha() string {
 }
 
 // GetStageMap gets stages
-func (d *DCE) GetStageMap() map[string]bool {
-	stagemap := make(map[string]bool)
+func (d *DCE) GetStageMap() map[string]string {
+	stagemap := make(map[string]string)
 	for _, s := range d.Build.Stages {
-		stagemap[s.Name] = s.Status == buildSuccess
+		stagemap[s.Name] = s.Status
 	}
 	return stagemap
 }
