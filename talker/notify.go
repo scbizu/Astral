@@ -14,6 +14,7 @@ type Notifaction struct {
 	buildStatus  string
 	depolyStatus string
 	commitNotes  string
+	duration     int64
 }
 
 const (
@@ -32,7 +33,7 @@ const (
 )
 
 // NewNotifaction init the Notifaction instance
-func NewNotifaction(repo string, stage map[string]string, commit string) *Notifaction {
+func NewNotifaction(repo string, stage map[string]string, commit string, duration int64) *Notifaction {
 	if _, ok := stage[testStage]; !ok {
 		return &Notifaction{}
 	}
@@ -50,6 +51,7 @@ func NewNotifaction(repo string, stage map[string]string, commit string) *Notifa
 		buildStatus:  buildStatus,
 		depolyStatus: deployStatus,
 		commitNotes:  commit,
+		duration:     duration,
 	}
 }
 
@@ -59,6 +61,7 @@ func (n *Notifaction) Notify() tgbotapi.MessageConfig {
 	text = fmt.Sprintf("%s\n **Test Status**: `%v`", text, n.testStatus)
 	text = fmt.Sprintf("%s\n **Build Status**: `%v`", text, n.buildStatus)
 	text = fmt.Sprintf("%s\n **Deploy Status**: `%v`", text, n.depolyStatus)
+	text = fmt.Sprintf("%s\n **Duration**: `%v`", text, n.duration)
 	return tgbotapi.MessageConfig{
 		BaseChat: tgbotapi.BaseChat{
 			ChannelUsername: ChannelName,

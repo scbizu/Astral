@@ -64,7 +64,8 @@ func ListenWebHook(debug bool) (err error) {
 				return
 			}
 			noti := talker.NewNotifaction(dceObj.GetRepoName(),
-				dceObj.GetStageMap(), dceObj.GetCommitMsg())
+				dceObj.GetStageMap(), dceObj.GetCommitMsg(),
+				dceObj.GetBuildDuration())
 			respMsg, err := bot.Send(noti.Notify())
 			if err != nil {
 				log.Println(err)
