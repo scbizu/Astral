@@ -67,9 +67,9 @@ func NewNotifaction(repo string, stage map[string]bool, commit string) *Notifact
 // Notify sends the msg to the tg channel
 func (n *Notifaction) Notify() tgbotapi.MessageConfig {
 	text := fmt.Sprintf("**Commit Note**: `%s` ", n.commitNotes)
-	text = fmt.Sprintf("%s\n **Test Status**:%v", text, n.isTestSucceed)
-	text = fmt.Sprintf("%s\n **Build Status**:%v", text, n.isBuildSucceed)
-	text = fmt.Sprintf("%s\n **Deploy Status**:%v", text, n.isDepolySucceed)
+	text = fmt.Sprintf("%s\n **Test Status**: %v", text, n.isTestSucceed)
+	text = fmt.Sprintf("%s\n **Build Status**: %v", text, n.isBuildSucceed)
+	text = fmt.Sprintf("%s\n **Deploy Status**: %v", text, n.isDepolySucceed)
 	return tgbotapi.MessageConfig{
 		BaseChat: tgbotapi.BaseChat{
 			ChannelUsername: ChannelName,
