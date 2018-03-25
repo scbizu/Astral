@@ -25,7 +25,7 @@ const (
 
 const (
 	// ChannelName defines build/deploy channel name
-	ChannelName = "@AstralServerNotifaction"
+	ChannelName = "@AstralServerNotification"
 )
 
 // NewNotifaction init the Notifaction instance
