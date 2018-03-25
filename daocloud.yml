@@ -38,5 +38,3 @@ deploy:
   only:
     branches:
       - master
-    tags:
-      - .*
