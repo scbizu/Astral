@@ -52,8 +52,8 @@ func ListenWebHook(debug bool) (err error) {
 			continue
 		}
 		pluginHub := plugin.NewTGPluginHub(update.Message)
-		var msg tgbotapi.MessageConfig
-		if isMsgBadRequest(pluginHub.RegistTGEnabledPlugins(update.Message)) {
+		msg := pluginHub.RegistTGEnabledPlugins(update.Message)
+		if isMsgBadRequest(msg) {
 			msg = tgbotapi.NewMessage(update.Message.Chat.ID, "Astral服务酱表示不想理你")
 		}
 
