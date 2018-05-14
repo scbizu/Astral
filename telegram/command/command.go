@@ -2,10 +2,10 @@ package command
 
 import (
 	"fmt"
-	"log"
 	"sync"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
+	"github.com/sirupsen/logrus"
 )
 
 //Handler defines handle func
@@ -57,10 +57,15 @@ func NewCommand(name CommanderName, u string, handler Handler) *Commander {
 	return c
 }
 
+// String return commanderName
+func (c CommanderName) String() string {
+	return string(c)
+}
+
 //Do will run the command behavior
 func (c *Commander) Do(msg *tgbotapi.Message) tgbotapi.MessageConfig {
 	if msg.Command() != string(c.Name) {
-		log.Printf("%s skiped command %s", msg.Command(), string(c.Name))
+		logrus.Infof("%s skiped command %s", msg.Command(), string(c.Name))
 		return tgbotapi.MessageConfig{}
 	}
 	return c.behavior(msg)

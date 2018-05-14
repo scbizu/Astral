@@ -1,9 +1,8 @@
 package telegram
 
 import (
-	"log"
-
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
+	"github.com/sirupsen/logrus"
 )
 
 //PullAndReply pull the msg (long polling) and response
@@ -13,7 +12,7 @@ func PullAndReply() (err error) {
 		return
 	}
 	bot.Debug = true
-	log.Printf("bot auth passed as %s", bot.Self.UserName)
+	logrus.Infof("bot auth passed as %s", bot.Self.UserName)
 
 	config := tgbotapi.NewUpdate(0)
 	config.Timeout = 60

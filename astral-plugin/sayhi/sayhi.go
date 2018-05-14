@@ -13,14 +13,20 @@ const (
 )
 
 //Register regists sayhi plugin
-func Register(msg *tgbotapi.Message) tgbotapi.MessageConfig {
-	sayHandler := func(msg *tgbotapi.Message) tgbotapi.MessageConfig {
-		user := msg.From.UserName
-		if user == masterName {
-			user = "master"
+func Register(msg *tgbotapi.Message) func(*tgbotapi.Message) tgbotapi.MessageConfig {
+
+	sayhiRegister := func(msg *tgbotapi.Message) tgbotapi.MessageConfig {
+		sayHandler := func(msg *tgbotapi.Message) tgbotapi.MessageConfig {
+			user := msg.From.UserName
+			if user == masterName {
+				user = "master"
+			}
+			return tgbotapi.NewMessage(msg.Chat.ID, fmt.Sprintf("hi,%s", user))
 		}
-		return tgbotapi.NewMessage(msg.Chat.ID, fmt.Sprintf("hi,%s", user))
+		say := command.NewCommand(command.CommandSayhi, "say hi to every one", sayHandler)
+		return say.Do(msg)
 	}
-	say := command.NewCommand(command.CommandSayhi, "say hi to every one", sayHandler)
-	return say.Do(msg)
+
+	return sayhiRegister
+
 }

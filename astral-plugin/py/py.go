@@ -9,13 +9,16 @@ import (
 )
 
 //Register regists py plugin
-func Register(msg *tgbotapi.Message) tgbotapi.MessageConfig {
-	pyHandler := func(msg *tgbotapi.Message) tgbotapi.MessageConfig {
-		pyStr := format(command.GetAllCommands())
-		return tgbotapi.NewMessage(msg.Chat.ID, pyStr)
+func Register(msg *tgbotapi.Message) func(*tgbotapi.Message) tgbotapi.MessageConfig {
+	pyRegister := func(msg *tgbotapi.Message) tgbotapi.MessageConfig {
+		pyHandler := func(msg *tgbotapi.Message) tgbotapi.MessageConfig {
+			pyStr := format(command.GetAllCommands())
+			return tgbotapi.NewMessage(msg.Chat.ID, pyStr)
+		}
+		pyCommand := command.NewCommand(command.CommandShowAllCommand, "make py with @botfather", pyHandler)
+		return pyCommand.Do(msg)
 	}
-	pyCommand := command.NewCommand(command.CommandShowAllCommand, "make py with @botfather", pyHandler)
-	return pyCommand.Do(msg)
+	return pyRegister
 }
 
 func format(commands []*command.Commander) (formatedStr string) {

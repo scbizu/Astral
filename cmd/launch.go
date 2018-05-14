@@ -1,9 +1,8 @@
 package cmd
 
 import (
-	"log"
-
 	"github.com/scbizu/Astral/telegram"
+	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
 
@@ -19,7 +18,7 @@ var LaunchCmd = &cobra.Command{
 		// }
 
 		if err := telegram.ListenWebHook(true); err != nil {
-			log.Fatal(err)
+			logrus.Fatal(err)
 		}
 
 		return
