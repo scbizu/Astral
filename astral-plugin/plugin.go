@@ -44,11 +44,13 @@ func (p *TGPlugin) Run(msg *tgbotapi.Message) (tgbotapi.MessageConfig, error) {
 	return tgbotapi.MessageConfig{}, fmt.Errorf("plugin %s is not enabled", p.name)
 }
 
-// NewEmptyTGPluginHub init empty plugin hub
-func NewEmptyTGPluginHub() *TGPluginHub {
-	return &TGPluginHub{
+// NewTGPluginHub init empty plugin hub
+func NewTGPluginHub(msg *tgbotapi.Message) *TGPluginHub {
+	hub := &TGPluginHub{
 		plugins: []*TGPlugin{},
 	}
+	hub.InitRegister(msg)
+	return hub
 }
 
 // InitRegister regist all command
@@ -77,12 +79,10 @@ func (ph *TGPluginHub) AddPlugin(p *TGPlugin) {
 // RegistTGEnabledPlugins regists telegram plugin
 func (ph *TGPluginHub) RegistTGEnabledPlugins(rawmsg *tgbotapi.Message) (msg tgbotapi.MessageConfig) {
 
-	ph.InitRegister(rawmsg)
-
 	for _, p := range ph.GetEnabledTelegramPlugins() {
 		msg, _ = p.Run(rawmsg)
 		logrus.Infof("[chatID:%d,msg:%s]", msg.ChatID, msg.Text)
-		if !p.validate(msg) {
+		if p.validate(msg) {
 			return
 		}
 	}
