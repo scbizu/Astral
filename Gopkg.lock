@@ -56,6 +56,12 @@
   revision = "441bde85a09735b74bb8d80b1e2a58844f347bc6"
 
 [[projects]]
+  name = "github.com/sirupsen/logrus"
+  packages = ["."]
+  revision = "c155da19408a8799da419ed3eeb0cb5db0ad5dbc"
+  version = "v1.0.5"
+
+[[projects]]
   branch = "master"
   name = "github.com/songtianyi/rrframework"
   packages = ["config","logs"]
@@ -80,13 +86,25 @@
 
 [[projects]]
   branch = "master"
+  name = "golang.org/x/crypto"
+  packages = ["ssh/terminal"]
+  revision = "2fc4c88bf43f0ea5ea305eae2b7af24b2cc93287"
+
+[[projects]]
+  branch = "master"
   name = "golang.org/x/net"
   packages = ["html","html/atom","websocket"]
   revision = "6078986fec03a1dcc236c34816c71b0e05018fda"
 
+[[projects]]
+  branch = "master"
+  name = "golang.org/x/sys"
+  packages = ["unix","windows"]
+  revision = "7c87d13f8e835d2fb3a70a2912c811ed0c1d241b"
+
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "9d7a4009e04c5a65e98d57a44a8f87a0b0e1198521cd769bbcc1fdf515afb1aa"
+  inputs-digest = "2ebe3394c681210fd42ee95129dc24eab738267e300e2263b05563745d0e4efb"
   solver-name = "gps-cdcl"
   solver-version = 1
