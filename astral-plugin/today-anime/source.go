@@ -115,6 +115,20 @@ func GetAllAnimes() (objs []*SrcObj, err error) {
 	return
 }
 
+// GetAnimeFromB get anime from bilibili
+func GetAnimeFromB() (objs []*SrcObj, err error) {
+	objs, err = GetAnimeFromBGC()
+	if err != nil {
+		return
+	}
+	bbjp, err := GetAnimeFromBJP()
+	if err != nil {
+		return nil, err
+	}
+	objs = append(objs, bbjp...)
+	return
+}
+
 //GetAnimeFromBGC ....
 func GetAnimeFromBGC() ([]*SrcObj, error) {
 	bgcSrc, err := url.Parse(BilibiliGC)

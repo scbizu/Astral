@@ -19,7 +19,7 @@ func Register(msg *tgbotapi.Message) func(*tgbotapi.Message) tgbotapi.MessageCon
 
 	animeRegister := func(msg *tgbotapi.Message) tgbotapi.MessageConfig {
 		handler := func(msg *tgbotapi.Message) tgbotapi.MessageConfig {
-			animeInfo, err := GetAllAnimes()
+			animeInfo, err := GetAnimeFromB()
 			if err != nil {
 				asError := fmt.Errorf("astral has an error:[%s]", err.Error())
 				return tgbotapi.NewMessage(msg.Chat.ID, asError.Error())
