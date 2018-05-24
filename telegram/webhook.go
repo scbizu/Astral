@@ -57,11 +57,45 @@ func ListenWebHook(debug bool) (err error) {
 			msg = tgbotapi.NewMessage(update.Message.Chat.ID, "Astral服务酱表示不想理你")
 		}
 
+		mbNames, ok := isMsgNewMember(update)
+		if ok {
+			msg = tgbotapi.NewMessage(update.Message.Chat.ID, fmt.Sprintf("撒花欢迎新基佬(%v)入群", mbNames))
+		}
+
+		_, ok = isMsgLeftMember(update)
+		if ok {
+			// drop the member left message
+			continue
+		}
+
 		msg.ReplyToMessageID = update.Message.MessageID
 		bot.Send(msg)
 	}
 
 	return
+}
+
+func isMsgNewMember(update tgbotapi.Update) ([]string, bool) {
+	members := update.Message.NewChatMembers
+	if members == nil {
+		return nil, false
+	}
+	if len(*members) == 0 {
+		return nil, false
+	}
+	var mbNames []string
+	for _, m := range *members {
+		mbNames = append(mbNames, m.String())
+	}
+	return mbNames, true
+}
+
+func isMsgLeftMember(update tgbotapi.Update) (string, bool) {
+	if update.Message.LeftChatMember == nil {
+		return "", false
+	}
+	mbName := update.Message.LeftChatMember.String()
+	return mbName, true
 }
 
 func isMsgBadRequest(msg tgbotapi.MessageConfig) bool {
