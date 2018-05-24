@@ -1,13 +1,18 @@
 Astral
 ---
-Astral is a WIP bot based on wechat-go and telegram-go,it will provide some useful and interesting features.
+Astral is a WIP bot based on telegram-go,it will provide some useful and interesting features.
 
 All features will provide as a plugin (package).
 
-* Feature Lists
+Internal Feature List:
 
-    * Wechat
+* TodayAnime
+* Sayhi
+* PY
 
-    * Telegram
+The design is inspired by [wechat-go](https://github.com/songtianyi/wechat-go)
+
+
+[@Astral](https://t.me/AstralAwesomeBot) in Telegram to get more information
 
 Just enjoy it :)
