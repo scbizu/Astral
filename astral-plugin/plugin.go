@@ -11,14 +11,19 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-// Handler defines the plugin handler
-type Handler func(*tgbotapi.Message) tgbotapi.MessageConfig
+// Register defines the plugin common register
+type Register func(*tgbotapi.Message) tgbotapi.MessageConfig
+
+// Handler defines plugin must impl interface
+type Handler interface {
+	Register(msg *tgbotapi.Message) func(*tgbotapi.Message) tgbotapi.MessageConfig
+}
 
 // TGPlugin defines the common telegram plugin
 type TGPlugin struct {
-	enable bool
-	handle Handler
-	name   string
+	enable   bool
+	register Register
+	name     string
 }
 
 // TGPluginHub defines the telegram plugin hub
@@ -27,18 +32,18 @@ type TGPluginHub struct {
 }
 
 // NewTGPlugin init the tg plugin
-func NewTGPlugin(name string, handler Handler) *TGPlugin {
+func NewTGPlugin(name string, msg *tgbotapi.Message, handler Handler) *TGPlugin {
 	return &TGPlugin{
-		enable: true,
-		handle: handler,
-		name:   name,
+		enable:   true,
+		register: handler.Register(msg),
+		name:     name,
 	}
 }
 
 // Run runs the enabled plugins
 func (p *TGPlugin) Run(msg *tgbotapi.Message) (tgbotapi.MessageConfig, error) {
 	if p.enable {
-		msgConf := p.handle(msg)
+		msgConf := p.register(msg)
 		return msgConf, nil
 	}
 	return tgbotapi.MessageConfig{}, fmt.Errorf("plugin %s is not enabled", p.name)
@@ -55,10 +60,10 @@ func NewTGPluginHub(msg *tgbotapi.Message) *TGPluginHub {
 
 // InitRegister regist all command
 func (ph *TGPluginHub) InitRegister(msg *tgbotapi.Message) {
-	ph.AddPlugin(NewTGPlugin(command.CommandSayhi.String(), Handler(sayhi.Register(msg))))
-	ph.AddPlugin(NewTGPlugin(command.CommandTodayAnime.String(), Handler(anime.Register(msg))))
+	ph.AddPlugin(NewTGPlugin(command.CommandSayhi.String(), msg, &sayhi.Handler{}))
+	ph.AddPlugin(NewTGPlugin(command.CommandTodayAnime.String(), msg, &anime.Handler{}))
 	// py plugin must be put in the end
-	ph.AddPlugin(NewTGPlugin(command.CommandShowAllCommand.String(), Handler(py.Register(msg))))
+	defer ph.AddPlugin(NewTGPlugin(command.CommandShowAllCommand.String(), msg, &py.Handler{}))
 }
 
 // GetEnabledTelegramPlugins get the all enable plugins

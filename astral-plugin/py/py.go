@@ -8,8 +8,11 @@ import (
 	"github.com/scbizu/Astral/telegram/command"
 )
 
-//Register regists py plugin
-func Register(msg *tgbotapi.Message) func(*tgbotapi.Message) tgbotapi.MessageConfig {
+// Handler impl the PluginHandler
+type Handler struct{}
+
+// Register regists py plugin
+func (h *Handler) Register(msg *tgbotapi.Message) func(*tgbotapi.Message) tgbotapi.MessageConfig {
 	pyRegister := func(msg *tgbotapi.Message) tgbotapi.MessageConfig {
 		pyHandler := func(msg *tgbotapi.Message) tgbotapi.MessageConfig {
 			pyStr := format(command.GetAllCommands())

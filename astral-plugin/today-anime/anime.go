@@ -10,12 +10,15 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+// Handler impl the PluginHandler
+type Handler struct{}
+
 func getCurrentDay() time.Weekday {
 	return time.Now().Weekday()
 }
 
 //Register regists anime plugin
-func Register(msg *tgbotapi.Message) func(*tgbotapi.Message) tgbotapi.MessageConfig {
+func (h *Handler) Register(msg *tgbotapi.Message) func(*tgbotapi.Message) tgbotapi.MessageConfig {
 
 	animeRegister := func(msg *tgbotapi.Message) tgbotapi.MessageConfig {
 		handler := func(msg *tgbotapi.Message) tgbotapi.MessageConfig {

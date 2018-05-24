@@ -12,8 +12,11 @@ const (
 	masterName = "scnace"
 )
 
+// Handler impl the PluginHandler
+type Handler struct{}
+
 //Register regists sayhi plugin
-func Register(msg *tgbotapi.Message) func(*tgbotapi.Message) tgbotapi.MessageConfig {
+func (h *Handler) Register(msg *tgbotapi.Message) func(*tgbotapi.Message) tgbotapi.MessageConfig {
 
 	sayhiRegister := func(msg *tgbotapi.Message) tgbotapi.MessageConfig {
 		sayHandler := func(msg *tgbotapi.Message) tgbotapi.MessageConfig {
