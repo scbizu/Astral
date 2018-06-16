@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
+	plugin "github.com/scbizu/Astral/astral-plugin"
 	"github.com/scbizu/Astral/telegram/command"
 )
 
@@ -32,4 +33,9 @@ func (h *Handler) Register(msg *tgbotapi.Message) func(*tgbotapi.Message) tgbota
 
 	return sayhiRegister
 
+}
+
+// Sayhi returns sayhi plugin
+func Sayhi(msg *tgbotapi.Message) *plugin.TGPlugin {
+	return plugin.NewTGPlugin(command.CommandSayhi.String(), msg, plugin.Handler(&Handler{}))
 }

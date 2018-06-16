@@ -7,7 +7,7 @@ import (
 	"os"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
-	plugin "github.com/scbizu/Astral/astral-plugin"
+	"github.com/scbizu/Astral/astral-plugin/hub"
 	"github.com/scbizu/Astral/getcert"
 	"github.com/scbizu/Astral/talker"
 	"github.com/scbizu/Astral/talker/dce"
@@ -51,7 +51,7 @@ func ListenWebHook(debug bool) (err error) {
 		if update.Message == nil {
 			continue
 		}
-		pluginHub := plugin.NewTGPluginHub(update.Message)
+		pluginHub := hub.NewTGPluginHub(update.Message)
 		msg := pluginHub.RegistTGEnabledPlugins(update.Message)
 		if isMsgBadRequest(msg) {
 			msg = tgbotapi.NewMessage(update.Message.Chat.ID, "Astral服务酱表示不想理你")

@@ -4,10 +4,6 @@ import (
 	"fmt"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
-	"github.com/scbizu/Astral/astral-plugin/py"
-	"github.com/scbizu/Astral/astral-plugin/sayhi"
-	"github.com/scbizu/Astral/astral-plugin/today-anime"
-	"github.com/scbizu/Astral/telegram/command"
 	"github.com/sirupsen/logrus"
 )
 
@@ -26,11 +22,6 @@ type TGPlugin struct {
 	name     string
 }
 
-// TGPluginHub defines the telegram plugin hub
-type TGPluginHub struct {
-	plugins []*TGPlugin
-}
-
 // NewTGPlugin init the tg plugin
 func NewTGPlugin(name string, msg *tgbotapi.Message, handler Handler) *TGPlugin {
 	return &TGPlugin{
@@ -38,6 +29,11 @@ func NewTGPlugin(name string, msg *tgbotapi.Message, handler Handler) *TGPlugin 
 		register: handler.Register(msg),
 		name:     name,
 	}
+}
+
+// IsPluginEnable returns if current plugin was enabled or not
+func (p *TGPlugin) IsPluginEnable() bool {
+	return p.enable
 }
 
 // Run runs the enabled plugins
@@ -49,53 +45,8 @@ func (p *TGPlugin) Run(msg *tgbotapi.Message) (tgbotapi.MessageConfig, error) {
 	return tgbotapi.MessageConfig{}, fmt.Errorf("plugin %s is not enabled", p.name)
 }
 
-// NewTGPluginHub init empty plugin hub
-func NewTGPluginHub(msg *tgbotapi.Message) *TGPluginHub {
-	hub := &TGPluginHub{
-		plugins: []*TGPlugin{},
-	}
-	hub.InitRegister(msg)
-	return hub
-}
-
-// InitRegister regist all command
-func (ph *TGPluginHub) InitRegister(msg *tgbotapi.Message) {
-	ph.AddPlugin(NewTGPlugin(command.CommandSayhi.String(), msg, &sayhi.Handler{}))
-	ph.AddPlugin(NewTGPlugin(command.CommandTodayAnime.String(), msg, &anime.Handler{}))
-	// py plugin must be put in the end
-	defer ph.AddPlugin(NewTGPlugin(command.CommandShowAllCommand.String(), msg, &py.Handler{}))
-}
-
-// GetEnabledTelegramPlugins get the all enable plugins
-func (ph *TGPluginHub) GetEnabledTelegramPlugins() (activePlugins []*TGPlugin) {
-	for _, p := range ph.plugins {
-		if p.enable {
-			activePlugins = append(activePlugins, p)
-		}
-	}
-	return
-}
-
-// AddPlugin adds the plugin
-func (ph *TGPluginHub) AddPlugin(p *TGPlugin) {
-	ph.plugins = append(ph.plugins, p)
-}
-
-// RegistTGEnabledPlugins regists telegram plugin
-func (ph *TGPluginHub) RegistTGEnabledPlugins(rawmsg *tgbotapi.Message) (msg tgbotapi.MessageConfig) {
-
-	for _, p := range ph.GetEnabledTelegramPlugins() {
-		msg, _ = p.Run(rawmsg)
-		logrus.Infof("[chatID:%d,msg:%s]", msg.ChatID, msg.Text)
-		if p.validate(msg) {
-			return
-		}
-	}
-
-	return
-}
-
-func (p *TGPlugin) validate(conf tgbotapi.MessageConfig) bool {
+// Validate validates message
+func (p *TGPlugin) Validate(conf tgbotapi.MessageConfig) bool {
 	logrus.Infof("[chatid]: %d,[msg Text]:%s", conf.ChatID, conf.Text)
 	if conf.ChatID != 0 && conf.Text != "" {
 		return true

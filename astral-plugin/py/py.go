@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
+	plugin "github.com/scbizu/Astral/astral-plugin"
 	"github.com/scbizu/Astral/telegram/command"
 )
 
@@ -35,4 +36,9 @@ func format(commands []*command.Commander) (formatedStr string) {
 		}
 	}
 	return res.String()
+}
+
+// PY returns py plugin
+func PY(msg *tgbotapi.Message) *plugin.TGPlugin {
+	return plugin.NewTGPlugin(command.CommandShowAllCommand.String(), msg, plugin.Handler(&Handler{}))
 }

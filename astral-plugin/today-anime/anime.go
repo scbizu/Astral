@@ -6,6 +6,7 @@ import (
 	"time"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
+	plugin "github.com/scbizu/Astral/astral-plugin"
 	"github.com/scbizu/Astral/telegram/command"
 	"github.com/sirupsen/logrus"
 )
@@ -17,7 +18,7 @@ func getCurrentDay() time.Weekday {
 	return time.Now().Weekday()
 }
 
-//Register regists anime plugin
+//Register register anime plugin
 func (h *Handler) Register(msg *tgbotapi.Message) func(*tgbotapi.Message) tgbotapi.MessageConfig {
 
 	animeRegister := func(msg *tgbotapi.Message) tgbotapi.MessageConfig {
@@ -52,4 +53,9 @@ func (h *Handler) Register(msg *tgbotapi.Message) func(*tgbotapi.Message) tgbota
 
 	return animeRegister
 
+}
+
+// Anime returns anime plugin
+func Anime(msg *tgbotapi.Message) *plugin.TGPlugin {
+	return plugin.NewTGPlugin(command.CommandTodayAnime.String(), msg, plugin.Handler(&Handler{}))
 }
