@@ -2,10 +2,10 @@ package hub
 
 import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
-	plugin "github.com/scbizu/Astral/astral-plugin"
-	"github.com/scbizu/Astral/astral-plugin/py"
-	"github.com/scbizu/Astral/astral-plugin/sayhi"
-	"github.com/scbizu/Astral/astral-plugin/today-anime"
+	plugin "github.com/scbizu/Astral/plugin"
+	"github.com/scbizu/Astral/plugin/py"
+	"github.com/scbizu/Astral/plugin/sayhi"
+	"github.com/scbizu/Astral/plugin/today-anime"
 	"github.com/sirupsen/logrus"
 )
 

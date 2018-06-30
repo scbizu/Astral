@@ -27,7 +27,7 @@ var (
 
 	owner string
 	//DataFilePath is the recipe yaml
-	DataFilePath = "./astral-plugin/lunch/recipe.yaml"
+	DataFilePath = "./plugin/lunch/recipe.yaml"
 )
 
 //Register regist the lunch plugin to the bot
