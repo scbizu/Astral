@@ -13,16 +13,21 @@ import (
 type Handler struct{}
 
 // Register regists py plugin
-func (h *Handler) Register(msg *tgbotapi.Message) func(*tgbotapi.Message) tgbotapi.MessageConfig {
-	pyRegister := func(msg *tgbotapi.Message) tgbotapi.MessageConfig {
-		pyHandler := func(msg *tgbotapi.Message) tgbotapi.MessageConfig {
-			pyStr := format(command.GetAllCommands())
-			return tgbotapi.NewMessage(msg.Chat.ID, pyStr)
-		}
-		pyCommand := command.NewCommand(command.CommandShowAllCommand, "make py with @botfather", pyHandler)
-		return pyCommand.Do(msg)
+func (h *Handler) Register(msg *tgbotapi.Message) tgbotapi.MessageConfig {
+
+	pyHandler := func(msg *tgbotapi.Message) tgbotapi.MessageConfig {
+		pyStr := format(command.GetAllCommands())
+		return tgbotapi.NewMessage(msg.Chat.ID, pyStr)
 	}
-	return pyRegister
+
+	pyCommand := command.NewCommand(
+		command.CommandShowAllCommand,
+		"make py with @botfather",
+		pyHandler,
+	)
+
+	return pyCommand.Do(msg)
+
 }
 
 func format(commands []*command.Commander) (formatedStr string) {

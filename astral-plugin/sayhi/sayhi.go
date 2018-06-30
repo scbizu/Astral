@@ -17,21 +17,18 @@ const (
 type Handler struct{}
 
 //Register regists sayhi plugin
-func (h *Handler) Register(msg *tgbotapi.Message) func(*tgbotapi.Message) tgbotapi.MessageConfig {
+func (h *Handler) Register(msg *tgbotapi.Message) tgbotapi.MessageConfig {
 
-	sayhiRegister := func(msg *tgbotapi.Message) tgbotapi.MessageConfig {
-		sayHandler := func(msg *tgbotapi.Message) tgbotapi.MessageConfig {
-			user := msg.From.UserName
-			if user == masterName {
-				user = "master"
-			}
-			return tgbotapi.NewMessage(msg.Chat.ID, fmt.Sprintf("hi,%s", user))
+	sayHandler := func(msg *tgbotapi.Message) tgbotapi.MessageConfig {
+		user := msg.From.UserName
+		if user == masterName {
+			user = "master"
 		}
-		say := command.NewCommand(command.CommandSayhi, "say hi to every one", sayHandler)
-		return say.Do(msg)
+		return tgbotapi.NewMessage(msg.Chat.ID, fmt.Sprintf("hi,%s", user))
 	}
 
-	return sayhiRegister
+	say := command.NewCommand(command.CommandSayhi, "say hi to every one", sayHandler)
+	return say.Do(msg)
 
 }
 

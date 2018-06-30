@@ -7,27 +7,24 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-// Register defines the plugin common register
-type Register func(*tgbotapi.Message) tgbotapi.MessageConfig
-
 // Handler defines plugin must impl interface
 type Handler interface {
-	Register(msg *tgbotapi.Message) func(*tgbotapi.Message) tgbotapi.MessageConfig
+	Register(msg *tgbotapi.Message) tgbotapi.MessageConfig
 }
 
 // TGPlugin defines the common telegram plugin
 type TGPlugin struct {
-	enable   bool
-	register Register
-	name     string
+	enable    bool
+	configure tgbotapi.MessageConfig
+	name      string
 }
 
 // NewTGPlugin init the tg plugin
 func NewTGPlugin(name string, msg *tgbotapi.Message, handler Handler) *TGPlugin {
 	return &TGPlugin{
-		enable:   true,
-		register: handler.Register(msg),
-		name:     name,
+		enable:    true,
+		configure: handler.Register(msg),
+		name:      name,
 	}
 }
 
@@ -39,8 +36,7 @@ func (p *TGPlugin) IsPluginEnable() bool {
 // Run runs the enabled plugins
 func (p *TGPlugin) Run(msg *tgbotapi.Message) (tgbotapi.MessageConfig, error) {
 	if p.enable {
-		msgConf := p.register(msg)
-		return msgConf, nil
+		return p.configure, nil
 	}
 	return tgbotapi.MessageConfig{}, fmt.Errorf("plugin %s is not enabled", p.name)
 }
