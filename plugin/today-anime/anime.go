@@ -6,7 +6,7 @@ import (
 	"time"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
-	plugin "github.com/scbizu/Astral/astral-plugin"
+	plugin "github.com/scbizu/Astral/plugin"
 	"github.com/scbizu/Astral/telegram/command"
 	"github.com/sirupsen/logrus"
 )
