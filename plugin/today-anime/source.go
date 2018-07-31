@@ -240,14 +240,13 @@ func scrapeDilidiliTimeLine(src *url.URL) ([]*SrcObj, error) {
 		return nil, err
 	}
 
-	today := convert2CNWeekDay(int(time.Now().In(location).Weekday()))
+	today := convert2CNWeekDay(int(time.Now().In(location).Weekday()), 6)
 	// log.Println(doc.Find(".container-row-1").Find(".two-auto").Find("ul").Find(''))
 
-	doc.Find(".container-row-1").Find(".two-auto").Find("ul").Each(func(index int, s *goquery.Selection) {
-		// log.Printf("inter:%d,cn:%d", int(time.Now().Weekday()), convert2CNWeekDay(int(time.Now().Weekday())))
+	doc.Find(".change").Eq(1).Find(".sldr").Find(".wrp > li").Each(func(index int, s *goquery.Selection) {
 		if index == today {
-			s.Find("li").Each(func(cindex int, cs *goquery.Selection) {
-				ele := cs.Find(".update-content").Find("h4").Find("a")
+			s.Find(".list > li").Each(func(cindex int, cs *goquery.Selection) {
+				ele := cs.Find("a")
 				obj := new(SrcObj)
 				obj.Src = "dilidili"
 				obj.BangumiName = ele.Text()
@@ -265,14 +264,14 @@ func scrapeDilidiliTimeLine(src *url.URL) ([]*SrcObj, error) {
 	return objs, nil
 }
 
-//weekday internationalWeekday    cnWeekday
-//Sun     0      6
-//Mon     1      0
-//Tue     2      1
-//Wed     3      2
-//Thu     4      3
-//Fri     5      4
-//Sat     6      5
-func convert2CNWeekDay(internationWeekday int) (cnWeekday int) {
-	return (internationWeekday + 6) % 7
+// weekday internationalWeekday    cnWeekday
+// Sun     0      6
+// Mon     1      0
+//`Tue     2      1
+// Wed     3      2
+// Thu     4      3
+// Fri     5      4
+// Sat     6      5
+func convert2CNWeekDay(internationWeekday int, offsetDay int) (cnWeekday int) {
+	return (internationWeekday + offsetDay) % 7
 }

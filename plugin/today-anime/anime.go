@@ -22,7 +22,7 @@ func getCurrentDay() time.Weekday {
 func (h *Handler) Register(msg *tgbotapi.Message) tgbotapi.MessageConfig {
 
 	handler := func(msg *tgbotapi.Message) tgbotapi.MessageConfig {
-		animeInfo, err := GetAnimeFromB()
+		animeInfo, err := GetAllAnimes()
 		if err != nil {
 			asError := fmt.Errorf("astral has an error:[%s]", err.Error())
 			return tgbotapi.NewMessage(msg.Chat.ID, asError.Error())
