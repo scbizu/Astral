@@ -275,7 +275,7 @@ func scrapeDilidiliTimeLine(src *url.URL) ([]*SrcObj, error) {
 // weekday internationalWeekday    cnWeekday
 // Sun     0      6
 // Mon     1      0
-//`Tue     2      1
+// Tue     2      1
 // Wed     3      2
 // Thu     4      3
 // Fri     5      4
