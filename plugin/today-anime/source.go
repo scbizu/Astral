@@ -240,7 +240,7 @@ func scrapeDilidiliTimeLine(src *url.URL) ([]*SrcObj, error) {
 		return nil, err
 	}
 
-	today := convert2CNWeekDay(int(time.Now().In(location).Weekday()), 5)
+	today := convert2CNWeekDay(int(time.Now().In(location).Weekday()), 6)
 	// log.Println(doc.Find(".container-row-1").Find(".two-auto").Find("ul").Find(''))
 
 	doc.Find(".change").Eq(1).Find(".sldr").Find(".wrp > li").Each(func(index int, s *goquery.Selection) {
