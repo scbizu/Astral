@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -12,6 +11,7 @@ import (
 	"time"
 
 	"github.com/PuerkitoBio/goquery"
+	"github.com/sirupsen/logrus"
 )
 
 //TimeLine defines bilibili's timeline
@@ -89,8 +89,8 @@ const (
 //FormatLinkInMarkdownPreview formats srcobj to Markdown view
 func (s *SrcObj) FormatLinkInMarkdownPreview() string {
 	name := fmt.Sprintf("[%s From %s]", s.BangumiName, s.Src)
-	linkstr := fmt.Sprintf("(%s)", s.Link.String())
 	if s.Pubed {
+		linkstr := fmt.Sprintf("(%s)", s.Link.String())
 		return fmt.Sprintf("%s%s", name, linkstr)
 	}
 	return fmt.Sprintf("%s From %s(未更新)", s.BangumiName, s.Src)
@@ -240,7 +240,7 @@ func scrapeDilidiliTimeLine(src *url.URL) ([]*SrcObj, error) {
 		return nil, err
 	}
 
-	today := convert2CNWeekDay(int(time.Now().In(location).Weekday()), 6)
+	today := convert2CNWeekDay(int(time.Now().In(location).Weekday()), 5)
 	// log.Println(doc.Find(".container-row-1").Find(".two-auto").Find("ul").Find(''))
 
 	doc.Find(".change").Eq(1).Find(".sldr").Find(".wrp > li").Each(func(index int, s *goquery.Selection) {
@@ -250,13 +250,21 @@ func scrapeDilidiliTimeLine(src *url.URL) ([]*SrcObj, error) {
 				obj := new(SrcObj)
 				obj.Src = "dilidili"
 				obj.BangumiName = ele.Text()
-				link, _ := ele.Attr("href")
-				var err error
-				obj.Link, err = formatNotAbsoluteLink(link, Dilidili)
-				if err != nil {
-					log.Printf("format dilidili url error:%s", err.Error())
+				if ele.Length() > 1 {
+					obj.Pubed = true
+					link, _ := ele.Eq(1).Attr("href")
+					var err error
+					obj.Link, err = formatNotAbsoluteLink(link, Dilidili)
+					if err != nil {
+						logrus.Error("format dilidili url error:%s", err.Error())
+					}
 				}
-				obj.Pubed = true
+				if obj.Link == nil {
+					obj.Link, err = url.Parse(Dilidili)
+					if err != nil {
+						logrus.Error(err)
+					}
+				}
 				objs = append(objs, obj)
 			})
 		}
