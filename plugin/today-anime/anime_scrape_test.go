@@ -33,6 +33,7 @@ func TestScrapeDilidiliTimeline(t *testing.T) {
 		return
 	}
 	for _, info := range infos {
-		t.Logf("AnimeName:%s", info.Link)
+		t.Logf("AnimeName:%s", info.BangumiName)
+		t.Logf("Link: %s", info.Link)
 	}
 }
