@@ -183,8 +183,12 @@ func formatLink(rawLink string) (resLink *url.URL, err error) {
 	return
 }
 
-func formatNotAbsoluteLink(rawlink string, src string) (resLink *url.URL, err error) {
-	resURL := fmt.Sprintf("%s%s", src, rawlink)
+func formatNotAbsoluteLink(uri string, src string) (resLink *url.URL, err error) {
+	if strings.Contains(uri, "://") {
+		resLink, err = url.Parse(uri)
+		return
+	}
+	resURL := fmt.Sprintf("%s%s", src, uri)
 	resLink, err = url.Parse(resURL)
 	return
 }
