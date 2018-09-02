@@ -1,11 +1,9 @@
 
-FROM  golang:1.10
+FROM  golang:1.11
 
-MAINTAINER scnace "scbizu@gmail.com"
+ADD . project/Astral
 
-ADD . $GOPATH/src/github.com/scbizu/Astral
-
-RUN cd $GOPATH/src/github.com/scbizu/Astral && go install
+RUN export GO11MODULE="on" && cd project/Astral && go mod download && go install
 
 ENTRYPOINT $GOPATH/bin/Astral
 
