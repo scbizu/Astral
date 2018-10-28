@@ -5,7 +5,6 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
-	"time"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 	"github.com/scbizu/Astral/getcert"
@@ -44,7 +43,7 @@ func ListenWebHook(debug bool) (err error) {
 	updatesMsgChannel := bot.ListenForWebhook(pattern)
 	logrus.Infof("msg in channel:%d", len(updatesMsgChannel))
 
-	go registDCEServer(bot)
+	registDCEServer(bot)
 
 	for update := range updatesMsgChannel {
 		logrus.Infof("[raw msg]:%#v\n", update)
@@ -70,14 +69,7 @@ func ListenWebHook(debug bool) (err error) {
 		}
 
 		msg.ReplyToMessageID = update.Message.MessageID
-
-		go func() {
-			time.Sleep(2 * time.Second)
-			bot.Send(msg)
-		}()
-
 		bot.Send(msg)
-
 	}
 
 	return
