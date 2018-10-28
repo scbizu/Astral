@@ -28,7 +28,7 @@ func ListenWebHook(debug bool) (err error) {
 	cert := getcert.NewDomainCert(tgAPIDomain)
 	domainWithToken := fmt.Sprintf("%s%s", cert.GetDomain(), token)
 	if _, err = bot.SetWebhook(tgbotapi.NewWebhook(domainWithToken)); err != nil {
-		logrus.Infof("notify webhook failed:%s", err.Error())
+		logrus.Errorf("notify webhook failed:%s", err.Error())
 		return
 	}
 
@@ -37,13 +37,15 @@ func ListenWebHook(debug bool) (err error) {
 		return err
 	}
 
-	logrus.Info(info.LastErrorMessage, info.LastErrorDate)
+	logrus.Debugf(info.LastErrorMessage, info.LastErrorDate)
 
 	pattern := fmt.Sprintf("/%s", token)
 	updatesMsgChannel := bot.ListenForWebhook(pattern)
-	logrus.Infof("msg in channel:%d", len(updatesMsgChannel))
+	logrus.Debugf("msg in channel:%d", len(updatesMsgChannel))
 
-	registDCEServer(bot)
+	go registerDCEServer(bot)
+
+	go healthCheck(bot)
 
 	for update := range updatesMsgChannel {
 		logrus.Infof("[raw msg]:%#v\n", update)
@@ -105,7 +107,7 @@ func isMsgBadRequest(msg tgbotapi.MessageConfig) bool {
 	return false
 }
 
-func registDCEServer(bot *tgbotapi.BotAPI) {
+func registerDCEServer(bot *tgbotapi.BotAPI) {
 	dceListenHandler := func(w http.ResponseWriter, r *http.Request) {
 		if r.Method == http.MethodPost {
 			r.ParseForm()
