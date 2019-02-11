@@ -33,7 +33,7 @@ build:
 deploy:
   job_type: DCS_deploy
   stage: deploy
-  app_name: Astral2
+  app_name: Astral
   cluster_id: ""
   only:
     branches:
