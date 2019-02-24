@@ -134,6 +134,26 @@ func (f *Fetcher) pushMSG(tls []int64, matches map[int64][]Match) {
 			sortedMatches = append(sortedMatches, m.GetMDMatchInfo())
 		}
 	}
-	matchPush := talker.NewMatchPush(sortedMatches)
-	f.Bot.Send(matchPush.GetPushMessage())
+	f.pushWithLimit(sortedMatches, 5)
+}
+
+func (f *Fetcher) pushWithLimit(matches []string, limit int) {
+	splitMatches := split(matches, limit)
+	for _, sm := range splitMatches {
+		matchPush := talker.NewMatchPush(sm)
+		f.Bot.Send(matchPush.GetPushMessage())
+	}
+}
+
+func split(buf []string, lim int) [][]string {
+	var chunk []string
+	chunks := make([][]string, 0, len(buf)/lim+1)
+	for len(buf) >= lim {
+		chunk, buf = buf[:lim], buf[lim:]
+		chunks = append(chunks, chunk)
+	}
+	if len(buf) > 0 {
+		chunks = append(chunks, buf[:len(buf)])
+	}
+	return chunks
 }
