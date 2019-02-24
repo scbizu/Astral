@@ -144,8 +144,7 @@ func (mp MatchParser) GetTimeMatches() (map[int64][]Match, error) {
 		return nil, err
 	}
 	matches := make(map[int64][]Match)
-	doc.Find(`#infobox_matches`).
-		Find(`.infobox_matches_content`).
+	doc.Find(`.infobox_matches_content`).
 		Each(func(idx int, s *goquery.Selection) {
 			lp := s.Find(`.team-left`).Text()
 			rp := s.Find(`.team-right`).Text()
@@ -165,7 +164,7 @@ func (mp MatchParser) GetTimeMatches() (map[int64][]Match, error) {
 			}
 			countDown := time.Until(t.In(cn))
 			if int64(countDown) < 0 {
-				matches[0] = append(matches[0], Match{
+				matches[t.In(cn).Unix()] = append(matches[t.In(cn).Unix()], Match{
 					isOnGoing:        true,
 					vs:               fmt.Sprintf("%s : %s", trimText(lp), trimText(rp)),
 					timeCountingDown: "",
