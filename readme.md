@@ -10,7 +10,7 @@ Internal Feature List:
 * Sayhi
 * PY
 
-The design is inspired by [wechat-go](https://github.com/songtianyi/wechat-go)
+The design is inspired by [wechat-go](https://github.com/songtianyi/wechat-go)
 
 
 [@Astral](https://t.me/AstralAwesomeBot) in Telegram to get more information
