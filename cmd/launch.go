@@ -13,10 +13,6 @@ var LaunchCmd = &cobra.Command{
 	Long:  "Launch command",
 	Run: func(cmd *cobra.Command, args []string) {
 
-		// if err := telegram.PullAndReply(); err != nil {
-		// 	log.Fatal(err)
-		// }
-
 		if err := telegram.ListenWebHook(true); err != nil {
 			logrus.Fatal(err)
 		}
