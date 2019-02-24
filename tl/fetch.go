@@ -63,7 +63,7 @@ func NewFetcher(bot *tgbotapi.BotAPI) *Fetcher {
 
 func (f *Fetcher) Do() error {
 	f.c = NewCron()
-	f.c.c.AddFunc("@every 1m", func() {
+	f.c.c.AddFunc("@every 1h", func() {
 		if f.cache.ItemCount() > 0 {
 			now := time.Now()
 			timeLines, ok := f.cache.Get(timelineCacheKey)
@@ -110,7 +110,7 @@ func (f *Fetcher) refreshCache() error {
 	if err != nil {
 		return err
 	}
-	f.cache.Set(timelineCacheKey, tlJSON, -1)
+	f.cache.Set(timelineCacheKey, string(tlJSON), -1)
 	matches, err := p.GetTimeMatches()
 	if err != nil {
 		return err
