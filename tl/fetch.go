@@ -64,16 +64,21 @@ func (f *Fetcher) Do() error {
 	f.c = NewCron()
 	f.c.c.AddFunc("@every 1m", func() {
 		if f.cache.ItemCount() > 0 {
-			now := time.Now().Unix()
+			now := time.Now()
 			timeLines, ok := f.cache.Get(timelineCacheKey)
 			if !ok {
+				return
+			}
+			cn, err := time.LoadLocation("Asia/Shanghai")
+			if err != nil {
+				logrus.Errorf("tl load location failed: %s", err.Error())
 				return
 			}
 			timeLineInts, ok := timeLines.(timelines)
 			if !ok {
 				return
 			}
-			if now < timeLineInts.getTheLastestTimeline() {
+			if now.In(cn).Unix() < timeLineInts.getTheLastestTimeline() {
 				return
 			}
 		}
