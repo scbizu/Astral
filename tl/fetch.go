@@ -68,6 +68,7 @@ func (f *Fetcher) Do() error {
 			now := time.Now()
 			timeLines, ok := f.cache.Get(timelineCacheKey)
 			if !ok {
+				logrus.Errorf("get timeline cache failed: %s", "no cache key")
 				return
 			}
 			cn, err := time.LoadLocation("Asia/Shanghai")
@@ -77,6 +78,7 @@ func (f *Fetcher) Do() error {
 			}
 			timeLineInts, ok := timeLines.(timelines)
 			if !ok {
+				logrus.Error("convert timeline interface{} -> []int{} failed")
 				return
 			}
 			if now.In(cn).Unix() < timeLineInts.getTheLastestTimeline() {
@@ -103,7 +105,7 @@ func (f *Fetcher) refreshCache() error {
 	if err != nil {
 		return err
 	}
-	f.cache.Set(timelineCacheKey, timelines, 6*time.Hour)
+	f.cache.Set(timelineCacheKey, timelines, -1)
 	matches, err := p.GetTimeMatches()
 	if err != nil {
 		return err
@@ -112,7 +114,7 @@ func (f *Fetcher) refreshCache() error {
 	go f.pushMSG(timelines, matches)
 
 	for t, m := range matches {
-		f.cache.Set(strconv.FormatInt(t, 10), m, 6*time.Hour)
+		f.cache.Set(strconv.FormatInt(t, 10), m, -1)
 	}
 	return nil
 }
