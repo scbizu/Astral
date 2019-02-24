@@ -11,6 +11,7 @@ import (
 	"github.com/scbizu/Astral/plugin/hub"
 	"github.com/scbizu/Astral/talker"
 	"github.com/scbizu/Astral/talker/dce"
+	"github.com/scbizu/Astral/tl"
 	"github.com/sirupsen/logrus"
 )
 
@@ -47,8 +48,16 @@ func ListenWebHook(debug bool) (err error) {
 
 	go healthCheck(bot)
 
+	go func(bot *tgbotapi.BotAPI) {
+		f := tl.NewFetcher(bot)
+		if err := f.Do(); err != nil {
+			logrus.Errorf("tl: %s", err.Error())
+			return
+		}
+	}(bot)
+
 	for update := range updatesMsgChannel {
-		logrus.Infof("[raw msg]:%#v\n", update)
+		logrus.Debugf("[raw msg]:%#v\n", update)
 
 		if update.Message == nil {
 			continue
