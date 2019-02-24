@@ -88,6 +88,8 @@ func NewMatchParser() (MatchParser, error) {
 	if err != nil {
 		return MatchParser{}, err
 	}
+	defer r.Close()
+
 	rawHTML, err := newParseRespFromReader(r)
 	if err != nil {
 		return MatchParser{}, nil
@@ -181,12 +183,11 @@ func (mp MatchParser) GetTimeMatches() (map[int64][]Match, error) {
 	return matches, nil
 }
 
-func GetHTMLMatchesResp() (io.Reader, error) {
+func GetHTMLMatchesResp() (io.ReadCloser, error) {
 	resp, err := http.Get(matchesURL)
 	if err != nil {
 		return nil, err
 	}
-	defer resp.Body.Close()
 
 	return resp.Body, nil
 }

@@ -63,6 +63,7 @@ func NewFetcher(bot *tgbotapi.BotAPI) *Fetcher {
 func (f *Fetcher) Do() error {
 	f.c = NewCron()
 	f.c.c.AddFunc("@every 1m", func() {
+		logrus.Infof("warming TL cache...")
 		if f.cache.ItemCount() > 0 {
 			now := time.Now()
 			timeLines, ok := f.cache.Get(timelineCacheKey)
