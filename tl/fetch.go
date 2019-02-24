@@ -80,6 +80,8 @@ func (f *Fetcher) Do() error {
 				return
 			}
 			if now.In(cn).Unix() < timeLineInts.getTheLastestTimeline() {
+				logrus.Infof("now is %d, the lasted match is at %d, no need to refresh cache.",
+					now.In(cn).Unix(), timeLineInts.getTheLastestTimeline())
 				return
 			}
 		}
