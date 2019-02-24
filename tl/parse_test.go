@@ -9,18 +9,19 @@ import (
 )
 
 func TestMatchParser_GetTimelines(t *testing.T) {
-	r, err := ioutil.ReadFile("test.json")
+	// r, err := ioutil.ReadFile("test.json")
+	// if err != nil {
+	// 	t.Error(err)
+	// 	return
+	// }
+	// resp, err := newParseRespFromReader(bytes.NewBuffer(r))
+	// if err != nil {
+	// 	t.Error(err)
+	// 	return
+	// }
+	mp, err := NewMatchParser()
 	if err != nil {
 		t.Error(err)
-		return
-	}
-	resp, err := newParseRespFromReader(bytes.NewBuffer(r))
-	if err != nil {
-		t.Error(err)
-		return
-	}
-	mp := MatchParser{
-		rawHTML: resp,
 	}
 	tls, err := mp.GetTimelines()
 	if err != nil {

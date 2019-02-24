@@ -19,18 +19,6 @@ const (
 	timelineCacheKey = "timelines"
 )
 
-type timelines []int64
-
-func (t timelines) getTheLastestTimeline() int64 {
-	if len(t) == 0 {
-		return 0
-	}
-	sort.SliceStable([]int64(t), func(i int, j int) bool {
-		return []int64(t)[i] < []int64(t)[j]
-	})
-	return []int64(t)[0]
-}
-
 var (
 	matchCache = cache.New(6*time.Hour, 12*time.Hour)
 )
@@ -63,7 +51,7 @@ func NewFetcher(bot *tgbotapi.BotAPI) *Fetcher {
 
 func (f *Fetcher) Do() error {
 	f.c = NewCron()
-	f.c.c.AddFunc("@every 1h", func() {
+	f.c.c.AddFunc("@every 1m", func() {
 		if f.cache.ItemCount() > 0 {
 			now := time.Now()
 			timeLines, ok := f.cache.Get(timelineCacheKey)
@@ -76,13 +64,21 @@ func (f *Fetcher) Do() error {
 				logrus.Errorf("tl load location failed: %s", err.Error())
 				return
 			}
-			t := new(timelines)
-			if err = json.Unmarshal([]byte(timeLines.(string)), t); err != nil {
+
+			t := make([]Timeline, 0)
+			if err = json.Unmarshal(timeLines.([]byte), &t); err != nil {
+				logrus.Errorf("unmarshal cache failed: %s", err.Error())
 				return
 			}
-			if now.In(cn).Unix() < t.getTheLastestTimeline() {
-				logrus.Infof("now is %d, the lasted match is at %d, no need to refresh cache.",
-					now.In(cn).Unix(), t.getTheLastestTimeline())
+
+			if len(t) == 0 {
+				logrus.Warn("get 0 timelines")
+				return
+			}
+
+			if now.In(cn).Unix() < getTheLastestTimeline(t) {
+				logrus.Infof("now is %d, the lastest match is at %d, no need to refresh cache.",
+					now.In(cn).Unix(), getTheLastestTimeline(t))
 				return
 			}
 		}
@@ -110,7 +106,7 @@ func (f *Fetcher) refreshCache() error {
 	if err != nil {
 		return err
 	}
-	f.cache.Set(timelineCacheKey, string(tlJSON), -1)
+	f.cache.Set(timelineCacheKey, tlJSON, -1)
 	matches, err := p.GetTimeMatches()
 	if err != nil {
 		return err
@@ -128,14 +124,14 @@ func (f *Fetcher) expireAllMatches() {
 	f.cache.Flush()
 }
 
-func (f *Fetcher) pushMSG(tls []int64, matches map[int64][]Match) {
+func (f *Fetcher) pushMSG(tls []Timeline, matches map[int64][]Match) {
 	sort.SliceStable(tls, func(i, j int) bool {
-		return tls[i] < tls[j]
+		return tls[i].T < tls[j].T
 	})
 
 	var sortedMatches []string
 	for _, tl := range tls {
-		ms, ok := matches[tl]
+		ms, ok := matches[tl.T]
 		if !ok {
 			continue
 		}
@@ -165,4 +161,18 @@ func split(buf []string, lim int) [][]string {
 		chunks = append(chunks, buf[:len(buf)])
 	}
 	return chunks
+}
+
+func getTheLastestTimeline(tls []Timeline) int64 {
+	sort.SliceStable(tls, func(i, j int) bool {
+		return tls[i].T < tls[j].T
+	})
+
+	for _, tl := range tls {
+		if !tl.IsOnGoing {
+			return tl.T
+		}
+	}
+
+	return 0
 }

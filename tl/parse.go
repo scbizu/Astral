@@ -57,6 +57,11 @@ const (
 	timeFmt    = `January 2, 2006 - 15:04 UTC`
 )
 
+type Timeline struct {
+	T         int64 `json:"t"`
+	IsOnGoing bool  `json:"isOnGoing"`
+}
+
 type MatchParser struct {
 	rawHTML string
 }
@@ -115,12 +120,12 @@ func newParseRespFromReader(r io.Reader) (string, error) {
 	return tlMatches.Parse.Text.RawHTML, nil
 }
 
-func (mp MatchParser) GetTimelines() ([]int64, error) {
+func (mp MatchParser) GetTimelines() ([]Timeline, error) {
 	doc, err := goquery.NewDocumentFromReader(bytes.NewBufferString(mp.rawHTML))
 	if err != nil {
 		return nil, err
 	}
-	var timelines []int64
+	var timelines []Timeline
 	doc.Find(`.timer-object-countdown-only`).Each(func(idx int, s *goquery.Selection) {
 		timelineStd, err := time.Parse(timeFmt, s.Text())
 		if err != nil {
@@ -132,7 +137,19 @@ func (mp MatchParser) GetTimelines() ([]int64, error) {
 			logrus.Errorf("parse failed: %s", err.Error())
 			return
 		}
-		timelines = append(timelines, timelineStd.In(cn).Unix())
+
+		countDown := time.Until(timelineStd.In(cn))
+		if countDown > 0 {
+			timelines = append(timelines, Timeline{
+				IsOnGoing: false,
+				T:         timelineStd.In(cn).Unix(),
+			})
+		} else {
+			timelines = append(timelines, Timeline{
+				IsOnGoing: true,
+				T:         timelineStd.In(cn).Unix(),
+			})
+		}
 	})
 	return timelines, nil
 }
