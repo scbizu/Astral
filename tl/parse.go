@@ -148,10 +148,6 @@ func (mp MatchParser) GetTimeMatches() (map[int64][]Match, error) {
 		Each(func(idx int, s *goquery.Selection) {
 			lp := s.Find(`.team-left`).Text()
 			rp := s.Find(`.team-right`).Text()
-			tournament := s.Find(`.matchticker-tournament-wrapper`).Text()
-			if tournament == "" {
-				tournament = "未知"
-			}
 			t, err := time.Parse(timeFmt, s.Find(`.timer-object-countdown-only`).Text())
 			if err != nil {
 				logrus.Errorf("parse failed: %s", err.Error())
@@ -164,6 +160,10 @@ func (mp MatchParser) GetTimeMatches() (map[int64][]Match, error) {
 			}
 			countDown := time.Until(t.In(cn))
 			if int64(countDown) < 0 {
+				tournament := s.Find(`.match-filler > div`).Text()
+				if tournament == "" {
+					tournament = "未知"
+				}
 				matches[t.In(cn).Unix()] = append(matches[t.In(cn).Unix()], Match{
 					isOnGoing:        true,
 					vs:               fmt.Sprintf("%s : %s", trimText(lp), trimText(rp)),
@@ -171,6 +171,10 @@ func (mp MatchParser) GetTimeMatches() (map[int64][]Match, error) {
 					series:           strings.TrimSpace(tournament),
 				})
 			} else {
+				tournament := s.Find(`.matchticker-tournament-wrapper`).Text()
+				if tournament == "" {
+					tournament = "未知"
+				}
 				matches[t.In(cn).Unix()] = append(matches[t.In(cn).Unix()], Match{
 					isOnGoing:        false,
 					vs:               fmt.Sprintf("%s : %s", trimText(lp), trimText(rp)),
