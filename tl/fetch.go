@@ -3,6 +3,7 @@ package tl
 
 import (
 	"context"
+	"encoding/json"
 	"sort"
 	"strconv"
 	"time"
@@ -75,17 +76,17 @@ func (f *Fetcher) Do() error {
 				logrus.Errorf("tl load location failed: %s", err.Error())
 				return
 			}
-			timeLineInts, ok := timeLines.(timelines)
-			if !ok {
-				logrus.Error("convert timeline interface{} -> []int{} failed")
+			t := new(timelines)
+			if err = json.Unmarshal([]byte(timeLines.(string)), t); err != nil {
 				return
 			}
-			if now.In(cn).Unix() < timeLineInts.getTheLastestTimeline() {
+			if now.In(cn).Unix() < t.getTheLastestTimeline() {
 				logrus.Infof("now is %d, the lasted match is at %d, no need to refresh cache.",
-					now.In(cn).Unix(), timeLineInts.getTheLastestTimeline())
+					now.In(cn).Unix(), t.getTheLastestTimeline())
 				return
 			}
 		}
+
 		logrus.Infof("warming TL cache...")
 		if err := f.refreshCache(); err != nil {
 			logrus.Errorf("refresh cache failed: %s", err.Error())
@@ -105,7 +106,11 @@ func (f *Fetcher) refreshCache() error {
 	if err != nil {
 		return err
 	}
-	f.cache.Set(timelineCacheKey, timelines, -1)
+	tlJSON, err := json.Marshal(timelines)
+	if err != nil {
+		return err
+	}
+	f.cache.Set(timelineCacheKey, tlJSON, -1)
 	matches, err := p.GetTimeMatches()
 	if err != nil {
 		return err
