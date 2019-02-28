@@ -53,8 +53,9 @@ type TLMatchPage struct {
 }
 
 const (
-	matchesURL = `https://liquipedia.net/starcraft2/api.php?action=parse&format=json&page=Liquipedia:Upcoming_and_ongoing_matches`
-	timeFmt    = `January 2, 2006 - 15:04 UTC`
+	matchesURL   = `https://liquipedia.net/starcraft2/api.php?action=parse&format=json&page=Liquipedia:Upcoming_and_ongoing_matches`
+	timeFmt      = `January 2, 2006 - 15:04 UTC`
+	maxCountDown = 60 * 60 * 24 * 2
 )
 
 type Timeline struct {
@@ -144,7 +145,7 @@ func (mp MatchParser) GetTimelines() ([]Timeline, error) {
 				IsOnGoing: false,
 				T:         timelineStd.In(cn).Unix(),
 			})
-		} else {
+		} else if countDown < maxCountDown {
 			timelines = append(timelines, Timeline{
 				IsOnGoing: true,
 				T:         timelineStd.In(cn).Unix(),
@@ -187,14 +188,14 @@ func (mp MatchParser) GetTimeMatches() (map[int64][]Match, error) {
 					timeCountingDown: "",
 					series:           strings.TrimSpace(tournament),
 				})
-			} else {
+			} else if countDown < maxCountDown {
 				tournament := s.Find(`.matchticker-tournament-wrapper`).Text()
 				if tournament == "" {
 					tournament = "未知"
 				}
 				matches[t.In(cn).Unix()] = append(matches[t.In(cn).Unix()], Match{
 					isOnGoing:        false,
-					vs:               fmt.Sprintf("%s : %s", trimText(lp), trimText(rp)),
+					vs:               fmt.Sprintf("%s vs %s", trimText(lp), trimText(rp)),
 					timeCountingDown: countDown.String(),
 					series:           strings.TrimSpace(tournament),
 				})
