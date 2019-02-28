@@ -55,7 +55,7 @@ type TLMatchPage struct {
 const (
 	matchesURL   = `https://liquipedia.net/starcraft2/api.php?action=parse&format=json&page=Liquipedia:Upcoming_and_ongoing_matches`
 	timeFmt      = `January 2, 2006 - 15:04 UTC`
-	maxCountDown = 60 * 60 * 24 * 2
+	maxCountDown = 24 * time.Hour
 )
 
 type Timeline struct {
@@ -184,7 +184,7 @@ func (mp MatchParser) GetTimeMatches() (map[int64][]Match, error) {
 				}
 				matches[t.In(cn).Unix()] = append(matches[t.In(cn).Unix()], Match{
 					isOnGoing:        true,
-					vs:               fmt.Sprintf("%s : %s", trimText(lp), trimText(rp)),
+					vs:               fmt.Sprintf("%s vs %s", trimText(lp), trimText(rp)),
 					timeCountingDown: "",
 					series:           strings.TrimSpace(tournament),
 				})
