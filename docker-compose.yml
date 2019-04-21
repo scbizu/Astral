@@ -1,24 +1,23 @@
 AstralCommandService:
-  image: daocloud.io/scbizu/astral
+  image: daocloud.io/scbizu/astral:master
   restart: always
   environment:
-  - BOTKEY=${BOTKEY}
-  command: astral service Command
-
+  - BOTKEY={$BOTKEY}
+  command: cd project/Astral && ./Astral service Command
 
 AstralServerMessage:
-  image: daocloud.io/scbizu/astral
+  image: daocloud.io/scbizu/astral:master
   restart: always
   ports:
   - 8443:8443
   environment:
-  - BOTKEY=${BOTKEY}
-  - LISTENPORT=${LISTENPORT}
-  command: astral service AstralServerMessage
+  - BOTKEY={$BOTKEY}
+  - LISTENPORT={$LISTENPORT}
+  command: cd project/Astral && ./Astral service AstralServerMessage
 
 AstralSC2EventInfo:
-  image: daocloud.io/scbizu/astral
+  image: daocloud.io/scbizu/astral:master
   restart: always
   environment:
-  - BOTKEY=${BOTKEY}
-  command: astral service SC2EventInfo
+  - BOTKEY={$BOTKEY}
+  command: cd project/Astral && ./Astral service SC2EventInfo

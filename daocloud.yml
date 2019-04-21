@@ -2,7 +2,6 @@ version: 3.0
 
 stages:
    - build
-   - deploy
 
 build:
    stage: build
@@ -16,12 +15,3 @@ build:
       - master
       tags:
       - .*
-
-deploy:
-  job_type: DCS_deploy
-  stage: deploy
-  app_name: Astral-Compose
-  cluster_id: ""
-  only:
-    branches:
-      - master
