@@ -95,8 +95,8 @@ func (b *Bot) ServeBotUpdateMessage() error {
 }
 
 func (b *Bot) ServePushAstralServerMessage() {
-	go registerDCEServer(b.bot)
 	go healthCheck(b.bot)
+	registerDCEServer(b.bot)
 }
 
 func (b *Bot) ServePushSC2Event() {

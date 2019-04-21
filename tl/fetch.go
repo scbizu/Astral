@@ -88,7 +88,7 @@ func (f *Fetcher) Do() error {
 			logrus.Errorf("refresh cache failed: %s", err.Error())
 		}
 	})
-	f.c.c.Start()
+	f.c.c.Run()
 	return nil
 }
 
