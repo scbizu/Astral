@@ -29,7 +29,7 @@ var CommandService = &cobra.Command{
 			return
 		}
 
-		if err := bot.ServceBotUpdateMessage(); err != nil {
+		if err := bot.ServeBotUpdateMessage(); err != nil {
 			logrus.Fatal(err)
 			return
 		}

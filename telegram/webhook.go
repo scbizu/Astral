@@ -51,12 +51,12 @@ func (b *Bot) setupWebhookConfig() error {
 			return err
 		}
 
-		logrus.Debugf(info.LastErrorMessage, info.LastErrorDate)
+		logrus.Debug(info.LastErrorMessage, info.LastErrorDate)
 	}
 	return nil
 }
 
-func (b *Bot) ServceBotUpdateMessage() error {
+func (b *Bot) ServeBotUpdateMessage() error {
 	if err := b.setupWebhookConfig(); err != nil {
 		return err
 	}
