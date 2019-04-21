@@ -1,8 +1,11 @@
 AstralCommandService:
   image: daocloud.io/scbizu/astral:master
   restart: always
+  ports:
+  - 8443:8443
   environment:
   - BOTKEY={$BOTKEY}
+  - LISTENPORT={$LISTENPORT}
   command:
   - /bin/sh
   - -c

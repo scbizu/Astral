@@ -36,7 +36,13 @@ func NewBot(isDebugMode bool) (*Bot, error) {
 	return bot, nil
 }
 
+func listenWebhook() {
+	port := fmt.Sprintf(":%s", os.Getenv("LISTENPORT"))
+	http.ListenAndServe(port, nil)
+}
+
 func (b *Bot) ServeBotUpdateMessage() error {
+	go listenWebhook()
 	b.bot.RemoveWebhook()
 	cert := getcert.NewDomainCert(tgAPIDomain)
 	domainWithToken := fmt.Sprintf("%s%s", cert.GetDomain(), token)
@@ -59,7 +65,6 @@ func (b *Bot) ServeBotUpdateMessage() error {
 	updatesMsgChannel := b.bot.ListenForWebhook(pattern)
 
 	logrus.Debugf("msg in channel:%d", len(updatesMsgChannel))
-
 	for update := range updatesMsgChannel {
 		logrus.Debugf("[raw msg]:%#v\n", update)
 
