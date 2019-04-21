@@ -33,7 +33,7 @@ build:
 deploy:
   job_type: DCS_deploy
   stage: deploy
-  app_name: Astral
+  app_name: Astral-Compose
   cluster_id: ""
   only:
     branches:

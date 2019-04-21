@@ -15,46 +15,55 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-//ListenWebHook is the tg api webhook mode
-func ListenWebHook(debug bool) (err error) {
-	bot, err := ConnectTG()
+type Bot struct {
+	bot         *tgbotapi.BotAPI
+	isDebugMode bool
+}
+
+func NewBot(isDebugMode bool) (*Bot, error) {
+	bot := new(Bot)
+	tgConn, err := ConnectTG()
 	if err != nil {
-		return
+		return nil, err
 	}
-	if debug {
-		bot.Debug = true
-		logrus.Infof("bot auth passed as %s", bot.Self.UserName)
+	bot.bot = tgConn
+	if isDebugMode {
+		logrus.SetLevel(logrus.DebugLevel)
+		bot.isDebugMode = true
+		tgConn.Debug = true
+		logrus.Infof("bot auth passed as %s", tgConn.Self.UserName)
 	}
-	bot.RemoveWebhook()
+	return bot, nil
+}
+
+func (b *Bot) setupWebhookConfig() error {
+
+	b.bot.RemoveWebhook()
 	cert := getcert.NewDomainCert(tgAPIDomain)
 	domainWithToken := fmt.Sprintf("%s%s", cert.GetDomain(), token)
-	if _, err = bot.SetWebhook(tgbotapi.NewWebhook(domainWithToken)); err != nil {
+	if _, err := b.bot.SetWebhook(tgbotapi.NewWebhook(domainWithToken)); err != nil {
 		logrus.Errorf("notify webhook failed:%s", err.Error())
-		return
-	}
-
-	info, err := bot.GetWebhookInfo()
-	if err != nil {
 		return err
 	}
-
-	logrus.Debugf(info.LastErrorMessage, info.LastErrorDate)
-
-	pattern := fmt.Sprintf("/%s", token)
-	updatesMsgChannel := bot.ListenForWebhook(pattern)
-	logrus.Debugf("msg in channel:%d", len(updatesMsgChannel))
-
-	go registerDCEServer(bot)
-
-	go healthCheck(bot)
-
-	go func(bot *tgbotapi.BotAPI) {
-		f := tl.NewFetcher(bot)
-		if err := f.Do(); err != nil {
-			logrus.Errorf("tl: %s", err.Error())
-			return
+	if b.isDebugMode {
+		info, err := b.bot.GetWebhookInfo()
+		if err != nil {
+			return err
 		}
-	}(bot)
+
+		logrus.Debugf(info.LastErrorMessage, info.LastErrorDate)
+	}
+	return nil
+}
+
+func (b *Bot) ServceBotUpdateMessage() error {
+	if err := b.setupWebhookConfig(); err != nil {
+		return err
+	}
+	pattern := fmt.Sprintf("/%s", token)
+	updatesMsgChannel := b.bot.ListenForWebhook(pattern)
+
+	logrus.Debugf("msg in channel:%d", len(updatesMsgChannel))
 
 	for update := range updatesMsgChannel {
 		logrus.Debugf("[raw msg]:%#v\n", update)
@@ -80,10 +89,22 @@ func ListenWebHook(debug bool) (err error) {
 		}
 
 		msg.ReplyToMessageID = update.Message.MessageID
-		bot.Send(msg)
+		b.bot.Send(msg)
 	}
+	return nil
+}
 
-	return
+func (b *Bot) ServePushAstralServerMessage() {
+	go registerDCEServer(b.bot)
+	go healthCheck(b.bot)
+}
+
+func (b *Bot) ServePushSC2Event() {
+	f := tl.NewFetcher(b.bot)
+	if err := f.Do(); err != nil {
+		logrus.Errorf("tl: %s", err.Error())
+		return
+	}
 }
 
 func isMsgNewMember(update tgbotapi.Update) ([]string, bool) {
