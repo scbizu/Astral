@@ -36,8 +36,7 @@ func NewBot(isDebugMode bool) (*Bot, error) {
 	return bot, nil
 }
 
-func (b *Bot) setupWebhookConfig() error {
-
+func (b *Bot) ServeBotUpdateMessage() error {
 	b.bot.RemoveWebhook()
 	cert := getcert.NewDomainCert(tgAPIDomain)
 	domainWithToken := fmt.Sprintf("%s%s", cert.GetDomain(), token)
@@ -53,14 +52,10 @@ func (b *Bot) setupWebhookConfig() error {
 
 		logrus.Debug(info.LastErrorMessage, info.LastErrorDate)
 	}
-	return nil
-}
-
-func (b *Bot) ServeBotUpdateMessage() error {
-	if err := b.setupWebhookConfig(); err != nil {
-		return err
-	}
 	pattern := fmt.Sprintf("/%s", token)
+	if b.isDebugMode {
+		logrus.Debugf("token: %s", token)
+	}
 	updatesMsgChannel := b.bot.ListenForWebhook(pattern)
 
 	logrus.Debugf("msg in channel:%d", len(updatesMsgChannel))
