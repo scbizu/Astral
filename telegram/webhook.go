@@ -172,5 +172,5 @@ func registerDCEServer(bot *tgbotapi.BotAPI) {
 
 	port := fmt.Sprintf(":%s", os.Getenv("LISTENPORT"))
 
-	go http.ListenAndServe(port, nil)
+	http.ListenAndServe(port, nil)
 }
