@@ -3,7 +3,10 @@ AstralCommandService:
   restart: always
   environment:
   - BOTKEY={$BOTKEY}
-  command: cd project/Astral && ./Astral service Command
+  command:
+  - /bin/sh
+  - -c
+  - "cd project/Astral \n./Astral service Command\n"
 
 AstralServerMessage:
   image: daocloud.io/scbizu/astral:master
@@ -13,11 +16,17 @@ AstralServerMessage:
   environment:
   - BOTKEY={$BOTKEY}
   - LISTENPORT={$LISTENPORT}
-  command: cd project/Astral && ./Astral service AstralServerMessage
+  command:
+  - /bin/sh
+  - -c
+  - "cd project/Astral \n./Astral service AstralServerMessage\n"
 
 AstralSC2EventInfo:
   image: daocloud.io/scbizu/astral:master
   restart: always
   environment:
   - BOTKEY={$BOTKEY}
-  command: cd project/Astral && ./Astral service SC2EventInfo
+  command:
+  - /bin/sh
+  - -c
+  - "cd project/Astral \n./Astral service SC2EventInfo\n"
