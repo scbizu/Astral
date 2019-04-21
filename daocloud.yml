@@ -1,21 +1,8 @@
 version: 3.0
 
 stages:
-   - test
    - build
    - deploy
-test:
-   stage: test
-   job_type: test
-   label: develop
-   image: ubuntu
-   script:
-      - echo non test now.
-   only:
-      branches:
-      - master
-      tags:
-      - .*
 
 build:
    stage: build
