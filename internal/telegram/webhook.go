@@ -7,11 +7,11 @@ import (
 	"os"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
-	"github.com/scbizu/Astral/getcert"
-	"github.com/scbizu/Astral/plugin/hub"
-	"github.com/scbizu/Astral/talker"
-	"github.com/scbizu/Astral/talker/dce"
-	"github.com/scbizu/Astral/tl"
+	"github.com/scbizu/Astral/internal/plugin/hub"
+	"github.com/scbizu/Astral/internal/tl"
+	"github.com/scbizu/Astral/pkg/getcert"
+	"github.com/scbizu/Astral/pkg/talker"
+	"github.com/scbizu/Astral/pkg/talker/dce"
 	"github.com/sirupsen/logrus"
 )
 

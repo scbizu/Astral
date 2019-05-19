@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/go-telegram-bot-api/telegram-bot-api"
-	"github.com/scbizu/Astral/talker"
+	"github.com/scbizu/Astral/pkg/talker"
 	"github.com/sirupsen/logrus"
 )
 

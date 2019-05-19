@@ -3,7 +3,7 @@ package py
 import (
 	"testing"
 
-	"github.com/scbizu/Astral/telegram/command"
+	"github.com/scbizu/Astral/internal/telegram/command"
 )
 
 func TestFormatPYCommands(t *testing.T) {

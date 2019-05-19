@@ -5,8 +5,8 @@ import (
 	"fmt"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
-	plugin "github.com/scbizu/Astral/plugin"
-	"github.com/scbizu/Astral/telegram/command"
+	plugin "github.com/scbizu/Astral/internal/plugin"
+	"github.com/scbizu/Astral/internal/telegram/command"
 )
 
 const (

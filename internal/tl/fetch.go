@@ -11,7 +11,7 @@ import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 	cache "github.com/patrickmn/go-cache"
 	"github.com/robfig/cron"
-	"github.com/scbizu/Astral/talker"
+	"github.com/scbizu/Astral/pkg/talker"
 	"github.com/sirupsen/logrus"
 )
 

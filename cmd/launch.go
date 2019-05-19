@@ -1,7 +1,7 @@
 package cmd
 
 import (
-	"github.com/scbizu/Astral/telegram"
+	"github.com/scbizu/Astral/internal/telegram"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
