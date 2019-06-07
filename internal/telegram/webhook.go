@@ -8,7 +8,6 @@ import (
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 	"github.com/scbizu/Astral/internal/plugin/hub"
-	"github.com/scbizu/Astral/internal/tl"
 	"github.com/scbizu/Astral/pkg/getcert"
 	"github.com/scbizu/Astral/pkg/talker"
 	"github.com/scbizu/Astral/pkg/talker/dce"
@@ -51,11 +50,11 @@ func (b *Bot) ServeBotUpdateMessage() error {
 		return err
 	}
 	if b.isDebugMode {
+		logrus.SetLevel(logrus.DebugLevel)
 		info, err := b.bot.GetWebhookInfo()
 		if err != nil {
 			return err
 		}
-
 		logrus.Debug(info.LastErrorMessage, info.LastErrorDate)
 	}
 	pattern := fmt.Sprintf("/%s", token)
@@ -97,14 +96,6 @@ func (b *Bot) ServeBotUpdateMessage() error {
 func (b *Bot) ServePushAstralServerMessage() {
 	go healthCheck(b.bot)
 	registerDCEServer(b.bot)
-}
-
-func (b *Bot) ServePushSC2Event() {
-	f := tl.NewFetcher(b.bot)
-	if err := f.Do(); err != nil {
-		logrus.Errorf("tl: %s", err.Error())
-		return
-	}
 }
 
 func isMsgNewMember(update tgbotapi.Update) ([]string, bool) {
