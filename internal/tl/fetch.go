@@ -142,17 +142,20 @@ func (f *Fetcher) pushMSG(tls []Timeline, matches map[int64][]Match) {
 
 func (f *Fetcher) pushWithLimit(matches []string, limit int) {
 	splitMatches := split(matches, limit)
+	// use n goroutines to send message
 	for _, dst := range f.dsts {
-		var idx int
-	SEND:
-		msg := dst.ResolveMessage(splitMatches[idx])
-		if err := dst.Send(msg); err != nil {
-			logrus.Errorf("sender: %s", err.Error())
-		}
-		idx++
-		if idx < len(splitMatches)-1 {
-			goto SEND
-		}
+		go func(dst Sender) {
+			var idx int
+		SEND:
+			msg := dst.ResolveMessage(splitMatches[idx])
+			if err := dst.Send(msg); err != nil {
+				logrus.Errorf("sender: %s", err.Error())
+			}
+			idx++
+			if idx < len(splitMatches)-1 {
+				goto SEND
+			}
+		}(dst)
 	}
 }
 
