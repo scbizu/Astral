@@ -145,11 +145,11 @@ func (f *Fetcher) pushWithLimit(matches []string, limit int) {
 	for _, dst := range f.dsts {
 		var idx int
 	SEND:
-		idx++
 		msg := dst.ResolveMessage(splitMatches[idx])
 		if err := dst.Send(msg); err != nil {
 			logrus.Errorf("sender: %s", err.Error())
 		}
+		idx++
 		if idx < len(splitMatches)-1 {
 			goto SEND
 		}
