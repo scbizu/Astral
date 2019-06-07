@@ -142,6 +142,9 @@ func (f *Fetcher) pushMSG(tls []Timeline, matches map[int64][]Match) {
 
 func (f *Fetcher) pushWithLimit(matches []string, limit int) {
 	splitMatches := split(matches, limit)
+	if len(splitMatches) == 0 {
+		return
+	}
 	// use n goroutines to send message
 	for _, dst := range f.dsts {
 		go func(dst Sender) {
