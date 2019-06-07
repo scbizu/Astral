@@ -8,10 +8,8 @@ import (
 	"strconv"
 	"time"
 
-	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 	cache "github.com/patrickmn/go-cache"
 	"github.com/robfig/cron"
-	"github.com/scbizu/Astral/pkg/talker"
 	"github.com/sirupsen/logrus"
 )
 
@@ -38,14 +36,14 @@ func NewCron() *mCron {
 type Fetcher struct {
 	c     *mCron
 	cache *cache.Cache
-	Bot   *tgbotapi.BotAPI
+	dsts  []Sender
 }
 
-func NewFetcher(bot *tgbotapi.BotAPI) *Fetcher {
+func NewFetcher(s ...Sender) *Fetcher {
 	return &Fetcher{
 		c:     new(mCron),
 		cache: matchCache,
-		Bot:   bot,
+		dsts:  s,
 	}
 }
 
@@ -144,9 +142,17 @@ func (f *Fetcher) pushMSG(tls []Timeline, matches map[int64][]Match) {
 
 func (f *Fetcher) pushWithLimit(matches []string, limit int) {
 	splitMatches := split(matches, limit)
-	for _, sm := range splitMatches {
-		matchPush := talker.NewMatchPush(sm)
-		f.Bot.Send(matchPush.GetPushMessage())
+	for _, dst := range f.dsts {
+		var idx int
+	SEND:
+		idx++
+		msg := dst.ResolveMessage(splitMatches[idx])
+		if err := dst.Send(msg); err != nil {
+			logrus.Errorf("sender: %s", err.Error())
+		}
+		if idx < len(splitMatches)-1 {
+			goto SEND
+		}
 	}
 }
 
