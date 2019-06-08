@@ -24,7 +24,7 @@ var CommandService = &cobra.Command{
 	Use:   "Command",
 	Short: "Astral command service",
 	Run: func(cmd *cobra.Command, args []string) {
-		bot, err := telegram.NewBot(true)
+		bot, err := telegram.NewBot(false)
 		if err != nil {
 			logrus.Fatal(err)
 			return
@@ -44,7 +44,7 @@ var ServerInfoService = &cobra.Command{
 	Use:   "AstralServerMessage",
 	Short: "Astral server message service",
 	Run: func(cmd *cobra.Command, args []string) {
-		bot, err := telegram.NewBot(true)
+		bot, err := telegram.NewBot(false)
 		if err != nil {
 			logrus.Fatal(err)
 			return

@@ -18,7 +18,7 @@ type PushService struct {
 }
 
 func (ps *PushService) ServePushSC2Event() error {
-	tgBot, err := telegram.NewBot(true)
+	tgBot, err := telegram.NewBot(false)
 	if err != nil {
 		return err
 	}
