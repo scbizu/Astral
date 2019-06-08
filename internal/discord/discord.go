@@ -28,6 +28,7 @@ func (b *Bot) Send(msg string) error {
 	if err := b.session.Open(); err != nil {
 		return err
 	}
+	defer b.session.Close()
 	if _, err := b.session.ChannelMessageSend(
 		config.DiscordCNSC2ChannelID,
 		msg,
