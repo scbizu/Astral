@@ -1,6 +1,7 @@
 package discord
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/bwmarrin/discordgo"
@@ -20,14 +21,13 @@ func NewBot() (*Bot, error) {
 }
 
 func (b *Bot) ResolveMessage(msgs []string) string {
-	return strings.Join(msgs, "\n\n")
+	return fmt.Sprintf("%s\n\n", strings.Join(msgs, "\n\n"))
 }
 
 func (b *Bot) Send(msg string) error {
 	if err := b.session.Open(); err != nil {
 		return err
 	}
-	defer b.session.Close()
 	if _, err := b.session.ChannelMessageSend(
 		config.DiscordCNSC2ChannelID,
 		msg,
