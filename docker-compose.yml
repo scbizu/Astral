@@ -29,7 +29,7 @@ AstralSC2EventInfo:
   restart: always
   environment:
   - BOTKEY={$BOTKEY}
-  - ASTRAL_DISCORD_CLIENT_ID={$DISCORD_CLIENT_ID}
+  - ASTRAL_DISCORD_CLIENT_ID={$ASTRAL_DISCORD_CLIENT_ID}
   command:
   - /bin/sh
   - -c
