@@ -24,8 +24,27 @@ func (b *Bot) ResolveMessage(msgs []string) string {
 }
 
 func (b *Bot) Send(msg string) error {
+	if err := b.session.Open(); err != nil {
+		return err
+	}
+	defer b.session.Close()
 	if _, err := b.session.ChannelMessageSend(
-		config.DiscordCNSC2ChannelName,
+		config.DiscordCNSC2ChannelID,
+		msg,
+	); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (b *Bot) SendToChannel(channelID string, msg string) error {
+	if err := b.session.Open(); err != nil {
+		return err
+	}
+	defer b.session.Close()
+	if _, err := b.session.ChannelMessageSend(
+		channelID,
 		msg,
 	); err != nil {
 		return err

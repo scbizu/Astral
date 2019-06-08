@@ -1,14 +1,15 @@
 package config
 
 import (
+	"fmt"
 	"os"
 )
 
 const (
-	DiscordCNSC2ChannelName = "CNSC2Event"
-	discordBotClientIDKey   = "ASTRAL_DISCORD_CLIENT_ID"
+	DiscordCNSC2ChannelID = "586225314078654484"
+	discordBotClientIDKey = "ASTRAL_DISCORD_CLIENT_ID"
 )
 
 func GetDiscordClientID() string {
-	return os.Getenv(discordBotClientIDKey)
+	return fmt.Sprintf("Bot %s", os.Getenv(discordBotClientIDKey))
 }
