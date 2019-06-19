@@ -44,7 +44,7 @@ func (b *Bot) ServeBotUpdateMessage() error {
 	go listenWebhook()
 	b.bot.RemoveWebhook()
 	cert := getcert.NewDomainCert(tgAPIDomain)
-	domainWithToken := fmt.Sprintf("%s%s", cert.GetDomain(), token)
+	domainWithToken := fmt.Sprintf("%s/%s", cert.GetDomain(), token)
 	if _, err := b.bot.SetWebhook(tgbotapi.NewWebhook(domainWithToken)); err != nil {
 		logrus.Errorf("notify webhook failed:%s", err.Error())
 		return err
