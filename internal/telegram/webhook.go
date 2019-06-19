@@ -131,6 +131,7 @@ func registerDCEServer(bot *tgbotapi.BotAPI) {
 			r.ParseForm()
 			body, err := ioutil.ReadAll(r.Body)
 			if err != nil {
+				logrus.Errorf("dce: read webhook msg failed: %q", err.Error())
 				w.WriteHeader(http.StatusInternalServerError)
 				w.Write([]byte(err.Error()))
 				return
@@ -138,24 +139,27 @@ func registerDCEServer(bot *tgbotapi.BotAPI) {
 			defer r.Body.Close()
 			dceObj, err := dce.NewDCEObj(string(body))
 			if err != nil {
+				logrus.Errorf("dce: read webhook msg failed: %q", err.Error())
 				w.WriteHeader(http.StatusInternalServerError)
 				w.Write([]byte(err.Error()))
 				return
 			}
+			// TODO: talker need to be REMOVED ASAP
 			noti := talker.NewNotifaction(dceObj.GetRepoName(),
 				dceObj.GetStageMap(), dceObj.GetCommitMsg(),
 				dceObj.GetBuildDuration())
+
 			respMsg, err := bot.Send(noti.Notify())
 			if err != nil {
-				w.WriteHeader(http.StatusBadRequest)
-				w.Write([]byte(err.Error()))
+				logrus.Errorf("telegram bot: send server info failed: %q", err.Error())
 				return
 			}
+
 			w.WriteHeader(http.StatusOK)
 			w.Write([]byte(respMsg.Text))
 		} else {
 			w.WriteHeader(http.StatusForbidden)
-			w.Write([]byte("Astral denied your request"))
+			w.Write([]byte("Astral has denied your request"))
 		}
 	}
 
