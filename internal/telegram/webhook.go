@@ -138,7 +138,7 @@ func registerDCEServer(bot *tgbotapi.BotAPI) {
 			}
 			defer r.Body.Close()
 
-			logrus.Infof("dce webhook: %s", string(body))
+			logrus.Debugf("dce webhook: %s", string(body))
 
 			dceObj, err := dce.NewDCEObj(string(body))
 			if err != nil {
