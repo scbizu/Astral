@@ -131,12 +131,10 @@ func registerDCEServer(bot *tgbotapi.BotAPI) {
 			r.ParseForm()
 			body, err := ioutil.ReadAll(r.Body)
 			if err != nil {
-				logrus.Println(err)
 				w.WriteHeader(http.StatusInternalServerError)
 				w.Write([]byte(err.Error()))
 				return
 			}
-
 			defer r.Body.Close()
 			dceObj, err := dce.NewDCEObj(string(body))
 			if err != nil {
@@ -161,7 +159,7 @@ func registerDCEServer(bot *tgbotapi.BotAPI) {
 		}
 	}
 
-	http.HandleFunc("/dce", dceListenHandler)
+	http.HandleFunc("/alert/dce", dceListenHandler)
 
 	port := fmt.Sprintf(":%s", os.Getenv("LISTENPORT"))
 
