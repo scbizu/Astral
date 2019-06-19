@@ -57,10 +57,7 @@ func (b *Bot) ServeBotUpdateMessage() error {
 		}
 		logrus.Debug(info.LastErrorMessage, info.LastErrorDate)
 	}
-	pattern := fmt.Sprintf("/%s", token)
-	if b.isDebugMode {
-		logrus.Debugf("token: %s", token)
-	}
+	pattern := fmt.Sprintf("/tg/%s", token)
 	updatesMsgChannel := b.bot.ListenForWebhook(pattern)
 
 	logrus.Debugf("msg in channel:%d", len(updatesMsgChannel))
