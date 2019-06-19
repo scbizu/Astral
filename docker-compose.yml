@@ -15,7 +15,7 @@ AstralServerMessage:
   image: daocloud.io/scbizu/astral:master
   restart: always
   ports:
-  - 8443:8443
+  - 8444:8444
   environment:
   - BOTKEY={$BOTKEY}
   - LISTENPORT={$LISTENPORT}
