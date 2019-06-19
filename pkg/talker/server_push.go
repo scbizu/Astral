@@ -62,7 +62,7 @@ func (n *Notifaction) Notify() tgbotapi.MessageConfig {
 	text = fmt.Sprintf("%s\n **Duration**: `%v s`", text, n.duration)
 	return tgbotapi.MessageConfig{
 		BaseChat: tgbotapi.BaseChat{
-			ChannelUsername: n.channelName,
+			ChannelUsername: ChannelName,
 		},
 		Text:      text,
 		ParseMode: tgbotapi.ModeMarkdown,
