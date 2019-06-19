@@ -3,6 +3,7 @@ package dce
 
 import (
 	"encoding/json"
+	"fmt"
 )
 
 const (
@@ -78,4 +79,24 @@ func (d *DCE) GetStageMap() map[string]string {
 // GetRepoName fetch repo's name
 func (d *DCE) GetRepoName() string {
 	return d.Name
+}
+
+func (d *DCE) Fmt() string {
+
+	text := fmt.Sprintf("[Commit Note]: `%s` ", d.GetCommitMsg())
+	testStage, ok := d.GetStageMap()["test"]
+	if ok {
+		text = fmt.Sprintf("%s\n **Test Status**: `%v`", text, testStage)
+	}
+	buildStage, ok := d.GetStageMap()["build"]
+	if ok {
+		text = fmt.Sprintf("%s\n **Build Status**: `%v`", text, buildStage)
+	}
+	deployStage, ok := d.GetStageMap()["deploy"]
+	if ok {
+		text = fmt.Sprintf("%s\n **Deploy Status**: `%v`", text, deployStage)
+	}
+	text = fmt.Sprintf("%s\n **Duration**: `%v s`", text, d.GetBuildDuration())
+
+	return text
 }

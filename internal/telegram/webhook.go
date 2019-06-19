@@ -147,12 +147,14 @@ func registerDCEServer(bot *tgbotapi.BotAPI) {
 				w.Write([]byte(err.Error()))
 				return
 			}
-			// TODO: talker need to be REMOVED ASAP
-			noti := talker.NewNotifaction(dceObj.GetRepoName(),
-				dceObj.GetStageMap(), dceObj.GetCommitMsg(),
-				dceObj.GetBuildDuration())
-
-			respMsg, err := bot.Send(noti.Notify())
+			msgConfig := tgbotapi.MessageConfig{
+				BaseChat: tgbotapi.BaseChat{
+					ChannelUsername: talker.ChannelName,
+				},
+				Text:      dceObj.Fmt(),
+				ParseMode: tgbotapi.ModeMarkdown,
+			}
+			respMsg, err := bot.Send(msgConfig)
 			if err != nil {
 				logrus.Errorf("telegram bot: send server info failed: %q", err.Error())
 				return
