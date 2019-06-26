@@ -7,6 +7,7 @@ import (
 	"io"
 	"io/ioutil"
 	"net/http"
+	"net/url"
 	"strings"
 	"time"
 
@@ -72,6 +73,7 @@ type Match struct {
 	vs               string
 	timeCountingDown string
 	series           string
+	stream           []string
 }
 
 func (m Match) GetMDMatchInfo() string {
@@ -182,11 +184,34 @@ func (mp MatchParser) GetTimeMatches() (map[int64][]Match, error) {
 				if tournament == "" {
 					tournament = "未知"
 				}
+				var streams []string
+				detailURL, ok := s.Find(`.matchticker-tournament-name > a`).Attr("href")
+				if !ok {
+					streams = append(streams, "无直播")
+				} else {
+					u, err := url.Parse("https://liquipedia.net/starcraft2/" + detailURL)
+					if err != nil {
+						logrus.Warnf("match parser: %q", err)
+						streams = append(streams, "获取直播源失败")
+						goto RETURN
+					}
+					md, err := getMatchDetail(u)
+					if err != nil {
+						logrus.Warnf("fetch match detail: %q", err)
+						streams = append(streams, "获取直播源失败")
+						goto RETURN
+					}
+					for _, s := range md.GetStreams() {
+						streams = append(streams, s.FmtToMarkdown())
+					}
+				}
+			RETURN:
 				matches[t.In(cn).Unix()] = append(matches[t.In(cn).Unix()], Match{
 					isOnGoing:        true,
 					vs:               fmt.Sprintf("%s vs %s", trimText(lp), trimText(rp)),
 					timeCountingDown: "",
 					series:           strings.TrimSpace(tournament),
+					stream:           streams,
 				})
 			} else if countDown < maxCountDown {
 				tournament := s.Find(`.matchticker-tournament-wrapper`).Text()
@@ -215,4 +240,32 @@ func GetHTMLMatchesResp() (io.ReadCloser, error) {
 
 func trimText(str string) string {
 	return strings.TrimSpace(str)
+}
+
+type MatchDetail struct {
+	players []string
+	from    time.Time
+	to      time.Time
+	// unit: $
+	prize     int64
+	organizer string
+	streams   []Stream
+}
+
+func getMatchDetail(u *url.URL) (MatchDetail, error) {
+	// TODO: fill with all infomation
+	return MatchDetail{}, nil
+}
+
+func (md MatchDetail) GetStreams() []Stream {
+	return md.streams
+}
+
+type Stream struct {
+	caster        string
+	streammingURL string
+}
+
+func (s Stream) FmtToMarkdown() string {
+	return fmt.Sprintf("[%s](%s)", s.caster, s.streammingURL)
 }
