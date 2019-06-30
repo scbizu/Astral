@@ -54,9 +54,13 @@ type TLMatchPage struct {
 }
 
 const (
-	matchesURL   = `https://liquipedia.net/starcraft2/api.php?action=parse&format=json&page=Liquipedia:Upcoming_and_ongoing_matches`
-	timeFmt      = `January 2, 2006 - 15:04 UTC`
-	maxCountDown = time.Hour
+	matchesURL            = `https://liquipedia.net/starcraft2/api.php?action=parse&format=json&page=Liquipedia:Upcoming_and_ongoing_matches`
+	timeFmt               = `January 2, 2006 - 15:04 UTC`
+	maxCountDown          = time.Hour
+	matchDetailFromIndex  = 19
+	matchDetailEndIndex   = 21
+	matchDetailPriceIndex = 17
+	matchDetailOrganizer  = 3
 )
 
 type Timeline struct {
@@ -78,7 +82,7 @@ type Match struct {
 
 func (m Match) GetMDMatchInfo() string {
 	if m.isOnGoing {
-		return fmt.Sprintf(" 【🐔 比赛对阵】 %s \n 【🏆 所属杯赛】 %s \n 【⏳ 比赛状态】 正在进行", m.vs, m.series)
+		return fmt.Sprintf(" 【🐔 比赛对阵】 %s \n 【🏆 所属杯赛】 %s \n 【📺 比赛直播】 %s", m.vs, m.series, strings.Join(m.stream, "/"))
 	}
 	return fmt.Sprintf(" 【🐔 比赛对阵】 %s \n 【🏆 所属杯赛】 %s \n 【⏳ 比赛状态】 倒计时 %s", m.vs, m.series, m.timeCountingDown)
 }
@@ -186,10 +190,11 @@ func (mp MatchParser) GetTimeMatches() (map[int64][]Match, error) {
 				}
 				var streams []string
 				detailURL, ok := s.Find(`.matchticker-tournament-name > a`).Attr("href")
+				logrus.Debugf("match detail URL: %s", detailURL)
 				if !ok {
 					streams = append(streams, "无直播")
 				} else {
-					u, err := url.Parse("https://liquipedia.net/starcraft2/" + detailURL)
+					u, err := url.Parse("https://liquipedia.net" + detailURL)
 					if err != nil {
 						logrus.Warnf("match parser: %q", err)
 						streams = append(streams, "获取直播源失败")
@@ -243,18 +248,76 @@ func trimText(str string) string {
 }
 
 type MatchDetail struct {
-	players []string
-	from    time.Time
-	to      time.Time
-	// unit: $
-	prize     int64
+	players   []string
+	from      time.Time
+	to        time.Time
+	prize     string
 	organizer string
 	streams   []Stream
 }
 
 func getMatchDetail(u *url.URL) (MatchDetail, error) {
-	// TODO: fill with all infomation
-	return MatchDetail{}, nil
+	mURL := u.String()
+	logrus.Debugf("match full url: %s", u.String())
+	d, err := goquery.NewDocument(mURL)
+	if err != nil {
+		return MatchDetail{}, err
+	}
+	var start, end time.Time
+	var prize string
+	var orger string
+	d.Find(`.infobox-cell-2`).Each(func(index int, s *goquery.Selection) {
+		if index == matchDetailFromIndex {
+			st, err := time.Parse(`2006-01-02`, s.Text())
+			if err != nil {
+				logrus.Warnf("match detail: %q", err.Error())
+				return
+			}
+			start = st
+		}
+
+		if index == matchDetailEndIndex {
+			ed, err := time.Parse(`2006-01-02`, s.Text())
+			if err != nil {
+				logrus.Warnf("match detail: %q", err.Error())
+				return
+			}
+			end = ed
+		}
+
+		if index == matchDetailPriceIndex {
+			prize = s.Text()
+		}
+
+		if index == matchDetailOrganizer {
+			orger = s.Text()
+		}
+	})
+
+	var streams []Stream
+	d.Find(`#Streams`).Parent().Next().Find(`li > a.external.text`).
+		Each(func(index int, s *goquery.Selection) {
+			logrus.Debugf("match streaming: %s", s.Text())
+			stream := Stream{}
+			h, ok := s.Attr(`href`)
+			if ok {
+				stream.caster = s.Text()
+				stream.streammingURL = h
+			} else {
+				stream.caster = "unknown"
+			}
+			streams = append(streams, stream)
+		})
+
+	return MatchDetail{
+		streams:   streams,
+		from:      start,
+		to:        end,
+		prize:     prize,
+		organizer: orger,
+		// TODO: parse players
+		players: []string{},
+	}, nil
 }
 
 func (md MatchDetail) GetStreams() []Stream {

@@ -9,16 +9,6 @@ import (
 )
 
 func TestMatchParser_GetTimelines(t *testing.T) {
-	// r, err := ioutil.ReadFile("test.json")
-	// if err != nil {
-	// 	t.Error(err)
-	// 	return
-	// }
-	// resp, err := newParseRespFromReader(bytes.NewBuffer(r))
-	// if err != nil {
-	// 	t.Error(err)
-	// 	return
-	// }
 	mp, err := NewMatchParser()
 	if err != nil {
 		t.Error(err)
@@ -33,6 +23,7 @@ func TestMatchParser_GetTimelines(t *testing.T) {
 }
 
 func TestMatchParser_GetTimeMatches(t *testing.T) {
+	logrus.SetLevel(logrus.DebugLevel)
 	r, err := ioutil.ReadFile("test.json")
 	if err != nil {
 		t.Error(err)
@@ -48,7 +39,11 @@ func TestMatchParser_GetTimeMatches(t *testing.T) {
 	}
 	matches, err := mp.GetTimeMatches()
 	if err != nil {
-		t.FailNow()
+		t.Error(err)
+		return
+	}
+	if len(matches) == 0 {
+		t.Error("parser: expected matches, found no matches")
 	}
 	if len(matches) > 0 {
 		for _, ms := range matches {
