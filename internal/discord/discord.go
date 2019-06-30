@@ -29,9 +29,15 @@ func (b *Bot) Send(msg string) error {
 		return err
 	}
 	defer b.session.Close()
-	if _, err := b.session.ChannelMessageSend(
+	if _, err := b.session.ChannelMessageSendEmbed(
 		config.DiscordCNSC2ChannelID,
-		msg,
+		&discordgo.MessageEmbed{
+			Fields: []*discordgo.MessageEmbedField{
+				&discordgo.MessageEmbedField{
+					Name:  "Event Update",
+					Value: msg,
+				},
+			}},
 	); err != nil {
 		return err
 	}
@@ -44,9 +50,15 @@ func (b *Bot) SendToChannel(channelID string, msg string) error {
 		return err
 	}
 	defer b.session.Close()
-	if _, err := b.session.ChannelMessageSend(
+	if _, err := b.session.ChannelMessageSendEmbed(
 		channelID,
-		msg,
+		&discordgo.MessageEmbed{
+			Fields: []*discordgo.MessageEmbedField{
+				&discordgo.MessageEmbedField{
+					Name:  "Event Update",
+					Value: msg,
+				},
+			}},
 	); err != nil {
 		return err
 	}

@@ -12,7 +12,7 @@ func TestSendMessage(t *testing.T) {
 		t.Fatalf("discord bot: %s", err.Error())
 	}
 
-	if err := s.SendToChannel(testChannelID, "Astral: Hello Discord"); err != nil {
+	if err := s.SendToChannel(testChannelID, "Astral: [Hello Discord](https://discord.gg)"); err != nil {
 		t.Fatalf("discord bot: %q", err.Error())
 	}
 }
