@@ -50,6 +50,7 @@ func NewFetcher(s ...Sender) *Fetcher {
 func (f *Fetcher) Do() error {
 	f.c = NewCron()
 	f.c.c.AddFunc("@every 1m", func() {
+		// do some condition tricks to save bandwidth
 		if f.cache.ItemCount() > 0 {
 			now := time.Now()
 			timeLines, ok := f.cache.Get(timelineCacheKey)
@@ -91,7 +92,6 @@ func (f *Fetcher) Do() error {
 }
 
 func (f *Fetcher) refreshCache() error {
-	f.expireAllMatches()
 	p, err := NewMatchParser()
 	if err != nil {
 		return err
@@ -110,7 +110,7 @@ func (f *Fetcher) refreshCache() error {
 		return err
 	}
 
-	go f.pushMSG(timelines, matches)
+	go f.pushMSG(timelines, f.expireCache(timelines, matches))
 
 	for t, m := range matches {
 		f.cache.Set(strconv.FormatInt(t, 10), m, -1)
@@ -118,8 +118,37 @@ func (f *Fetcher) refreshCache() error {
 	return nil
 }
 
-func (f *Fetcher) expireAllMatches() {
-	f.cache.Flush()
+// expireCache reuse the ongoing match info
+// and delete the out-of-date match info
+// Due to the reuseable cache, from now on , we should manage our cache carefully TAT
+func (f *Fetcher) expireCache(tls []Timeline, matches map[int64][]Match) map[int64][]Match {
+	// reuse cache:
+	// TL will reset Streaming caster URL after the match is going.
+	// We should keep the opening match info until it is closed.
+	for t := range matches {
+		cachedMatches, ok := f.cache.Get(strconv.FormatInt(t, 10))
+		if ok {
+			matches[t] = cachedMatches.([]Match)
+		}
+	}
+
+	if len(tls) == 0 {
+		return matches
+	}
+
+	sort.SliceStable(tls, func(i, j int) bool {
+		return tls[i].T < tls[j].T
+	})
+
+	// expire cache : T is less than the index 0 (the lowest one)
+	for t := range matches {
+		if t >= tls[0].T {
+			continue
+		}
+		delete(matches, t)
+		f.cache.Delete(strconv.FormatInt(t, 10))
+	}
+	return matches
 }
 
 func (f *Fetcher) pushMSG(tls []Timeline, matches map[int64][]Match) {
@@ -129,6 +158,7 @@ func (f *Fetcher) pushMSG(tls []Timeline, matches map[int64][]Match) {
 
 	var sortedMatches []string
 	for _, tl := range tls {
+		// matches must be the superset of the tls
 		ms, ok := matches[tl.T]
 		if !ok {
 			continue
