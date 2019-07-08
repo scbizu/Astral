@@ -110,7 +110,9 @@ func (f *Fetcher) refreshCache() error {
 		return err
 	}
 
-	go f.pushMSG(timelines, f.expireCache(timelines, matches))
+	matches = f.expireCache(timelines, matches)
+
+	go f.pushMSG(timelines, matches)
 
 	for t, m := range matches {
 		f.cache.Set(strconv.FormatInt(t, 10), m, -1)

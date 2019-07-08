@@ -183,7 +183,7 @@ func (mp MatchParser) GetTimeMatches() (map[int64][]Match, error) {
 				return
 			}
 			countDown := time.Until(t.In(cn))
-			if int64(countDown) < 0 {
+			if int64(countDown) <= 0 {
 				tournament := s.Find(`.match-filler > div`).Text()
 				if tournament == "" {
 					tournament = "未知"
