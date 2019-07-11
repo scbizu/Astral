@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"io/ioutil"
 	"testing"
+	"time"
 
 	"github.com/sirupsen/logrus"
 )
@@ -52,4 +53,17 @@ func TestMatchParser_GetTimeMatches(t *testing.T) {
 			}
 		}
 	}
+}
+
+func TestParseTS(t *testing.T) {
+	ti, err := time.Parse(timeFmt, "July 11, 2019 - 11:00 UTC")
+	if err != nil {
+		t.Fatal(err)
+	}
+	cn, err := time.LoadLocation("Asia/Shanghai")
+	if err != nil {
+		t.Fatal(err)
+	}
+	countDown := time.Until(ti.In(cn))
+	t.Log(int(countDown))
 }

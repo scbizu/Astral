@@ -184,30 +184,37 @@ func (mp MatchParser) GetTimeMatches() (map[int64][]Match, error) {
 			}
 			countDown := time.Until(t.In(cn))
 			if int64(countDown) <= 0 {
+				var streams []string
 				tournament := s.Find(`.match-filler > div`).Text()
 				if tournament == "" {
 					tournament = "未知"
-				}
-				var streams []string
-				detailURL, ok := s.Find(`.matchticker-tournament-name > a`).Attr("href")
-				logrus.Debugf("match detail URL: %s", detailURL)
-				if !ok {
 					streams = append(streams, "无直播")
 				} else {
-					u, err := url.Parse("https://liquipedia.net" + detailURL)
-					if err != nil {
-						logrus.Warnf("match parser: %q", err)
-						streams = append(streams, "获取直播源失败")
-						goto RETURN
-					}
-					md, err := getMatchDetail(u)
-					if err != nil {
-						logrus.Warnf("fetch match detail: %q", err)
-						streams = append(streams, "获取直播源失败")
-						goto RETURN
-					}
-					for _, s := range md.GetStreams() {
-						streams = append(streams, s.FmtToMarkdown())
+					detail := s.Find(`.match-filler > div > div > a`)
+					if detail.Length() == 0 {
+						logrus.Warn("match parser: match detail node not found")
+						streams = append(streams, "无直播")
+					} else {
+						detailURL, ok := detail.Attr("href")
+						if !ok {
+							streams = append(streams, "无直播")
+							goto RETURN
+						}
+						u, err := url.Parse("https://liquipedia.net" + detailURL)
+						if err != nil {
+							logrus.Warnf("match parser: %q", err)
+							streams = append(streams, "获取直播源失败")
+							goto RETURN
+						}
+						md, err := getMatchDetail(u)
+						if err != nil {
+							logrus.Warnf("fetch match detail: %q", err)
+							streams = append(streams, "获取直播源失败")
+							goto RETURN
+						}
+						for _, s := range md.GetStreams() {
+							streams = append(streams, s.FmtToMarkdown())
+						}
 					}
 				}
 			RETURN:
