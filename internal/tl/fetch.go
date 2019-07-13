@@ -86,8 +86,6 @@ func (f *Fetcher) refreshCache() error {
 		return err
 	}
 
-	matches = f.expireCache(timelines, matches)
-
 	go f.pushMSG(timelines, matches)
 
 	for t, m := range matches {
