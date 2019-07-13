@@ -229,6 +229,7 @@ func (mp MatchParser) GetTimeMatches() (map[int64][]Match, error) {
 						}
 					}
 				}
+				logrus.Debugf("streams: %#v", streams)
 				if len(streams) == 0 {
 					streams = append(streams, "直播源解析失败")
 				}
