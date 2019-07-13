@@ -172,7 +172,8 @@ func (mp MatchParser) GetTimeMatches() (map[int64][]Match, error) {
 		Each(func(idx int, s *goquery.Selection) {
 			lp := s.Find(`.team-left`).Text()
 			rp := s.Find(`.team-right`).Text()
-			t, err := time.Parse(timeFmt, s.Find(`.timer-object-countdown-only`).Text())
+			versus := s.Find(`.versus`).Text()
+			t, err := time.Parse(timeFmt, s.Find(`.timer-object-date`).Text())
 			if err != nil {
 				logrus.Errorf("parse failed: %s", err.Error())
 				return
@@ -188,44 +189,46 @@ func (mp MatchParser) GetTimeMatches() (map[int64][]Match, error) {
 				tournament := s.Find(`.match-filler > div`).Text()
 				if tournament == "" {
 					tournament = "未知"
-					streams = append(streams, "无直播")
 				} else {
 					detail := s.Find(`.match-filler > div > div > a`)
 					if detail.Length() == 0 {
 						logrus.Warn("match parser: match detail node not found")
-						streams = append(streams, "无直播")
 					} else {
 						detailURL, ok := detail.Attr("href")
 						if !ok {
-							streams = append(streams, "无直播")
 							goto RETURN
 						}
 						u, err := url.Parse("https://liquipedia.net" + detailURL)
 						if err != nil {
 							logrus.Warnf("match parser: %q", err)
-							streams = append(streams, "获取直播源失败")
 							goto RETURN
 						}
 						md, err := getMatchDetail(u)
 						if err != nil {
 							logrus.Warnf("fetch match detail: %q", err)
-							streams = append(streams, "获取直播源失败")
 							goto RETURN
 						}
 						for _, s := range md.GetStreams() {
+							if strings.TrimSpace(s.FmtToMarkdown()) == "" {
+								continue
+							}
 							streams = append(streams, s.FmtToMarkdown())
 						}
 					}
 				}
 			RETURN:
+				if len(streams) == 0 {
+					streams = append(streams, "获取直播源失败")
+				}
 				matches[t.In(cn).Unix()] = append(matches[t.In(cn).Unix()], Match{
-					isOnGoing:        true,
-					vs:               fmt.Sprintf("%s vs %s", trimText(lp), trimText(rp)),
-					timeCountingDown: "",
-					series:           strings.TrimSpace(tournament),
-					stream:           streams,
+					isOnGoing: true,
+					vs:        fmt.Sprintf("%s vs %s (%s)", trimText(lp), trimText(rp), versus),
+					series:    strings.TrimSpace(tournament),
+					stream:    streams,
 				})
-			} else if countDown < maxCountDown {
+			}
+
+			if 0 < int64(countDown) && int64(countDown) < int64(maxCountDown) {
 				tournament := s.Find(`.matchticker-tournament-wrapper`).Text()
 				if tournament == "" {
 					tournament = "未知"
