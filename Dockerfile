@@ -1,5 +1,5 @@
 
-FROM  golang:1.11
+FROM  golang:1.12
 
 ADD . project/Astral
 
