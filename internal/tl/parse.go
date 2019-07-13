@@ -70,6 +70,7 @@ type Timeline struct {
 
 type MatchParser struct {
 	rawHTML string
+	revID   int
 }
 
 type Match struct {
@@ -102,29 +103,34 @@ func NewMatchParser() (MatchParser, error) {
 	}
 	defer r.Close()
 
-	rawHTML, err := newParseRespFromReader(r)
+	revID, rawHTML, err := newParseRespFromReader(r)
 	if err != nil {
 		return MatchParser{}, nil
 	}
 	return MatchParser{
+		revID:   revID,
 		rawHTML: rawHTML,
 	}, nil
 }
 
-func newParseRespFromReader(r io.Reader) (string, error) {
+func newParseRespFromReader(r io.Reader) (int, string, error) {
 
 	body, err := ioutil.ReadAll(r)
 	if err != nil {
-		return "", err
+		return 0, "", err
 	}
 
 	tlMatches := new(TLMatchPage)
 
 	if err := json.Unmarshal(body, tlMatches); err != nil {
-		return "", err
+		return 0, "", err
 	}
 
-	return tlMatches.Parse.Text.RawHTML, nil
+	return tlMatches.Parse.Revid, tlMatches.Parse.Text.RawHTML, nil
+}
+
+func (mp MatchParser) GetRevID() int {
+	return mp.revID
 }
 
 func (mp MatchParser) GetTimelines() ([]Timeline, error) {
