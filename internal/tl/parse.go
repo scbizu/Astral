@@ -134,37 +134,26 @@ func (mp MatchParser) GetRevID() int {
 }
 
 func (mp MatchParser) GetTimelines() ([]Timeline, error) {
-	doc, err := goquery.NewDocumentFromReader(bytes.NewBufferString(mp.rawHTML))
+	matches, err := mp.GetTimeMatches()
 	if err != nil {
 		return nil, err
 	}
-	var timelines []Timeline
-	doc.Find(`.timer-object-countdown-only`).Each(func(idx int, s *goquery.Selection) {
-		timelineStd, err := time.Parse(timeFmt, s.Text())
-		if err != nil {
-			logrus.Errorf("parse failed: %s", err.Error())
-			return
-		}
-		cn, err := time.LoadLocation("Asia/Shanghai")
-		if err != nil {
-			logrus.Errorf("parse failed: %s", err.Error())
-			return
-		}
 
-		countDown := time.Until(timelineStd.In(cn))
-		if countDown > 0 {
-			timelines = append(timelines, Timeline{
-				IsOnGoing: false,
-				T:         timelineStd.In(cn).Unix(),
-			})
-		} else if countDown < maxCountDown {
-			timelines = append(timelines, Timeline{
-				IsOnGoing: true,
-				T:         timelineStd.In(cn).Unix(),
-			})
+	ts := []Timeline{}
+	for t, matches := range matches {
+		var isOnGoing bool
+		for _, m := range matches {
+			if m.isOnGoing {
+				isOnGoing = m.isOnGoing
+				break
+			}
 		}
-	})
-	return timelines, nil
+		ts = append(ts, Timeline{
+			T:         t,
+			IsOnGoing: isOnGoing,
+		})
+	}
+	return ts, nil
 }
 
 func (mp MatchParser) GetTimeMatches() (map[int64][]Match, error) {
@@ -179,7 +168,7 @@ func (mp MatchParser) GetTimeMatches() (map[int64][]Match, error) {
 			lp := s.Find(`.team-left`).Text()
 			rp := s.Find(`.team-right`).Text()
 			versus := s.Find(`.versus`).Text()
-			t, err := time.Parse(timeFmt, s.Find(`.timer-object-date`).Text())
+			t, err := time.Parse(timeFmt, s.Find(`.timer-object-countdown-only`).Text())
 			if err != nil {
 				logrus.Errorf("parse failed: %s", err.Error())
 				return
@@ -202,17 +191,35 @@ func (mp MatchParser) GetTimeMatches() (map[int64][]Match, error) {
 					} else {
 						detailURL, ok := detail.Attr("href")
 						if !ok {
-							goto RETURN
+							matches[t.In(cn).Unix()] = append(matches[t.In(cn).Unix()], Match{
+								isOnGoing: true,
+								vs:        fmt.Sprintf("%s vs %s (%s)", trimText(lp), trimText(rp), versus),
+								series:    strings.TrimSpace(tournament),
+								stream:    []string{"直播源解析失败"},
+							})
+							return
 						}
 						u, err := url.Parse("https://liquipedia.net" + detailURL)
 						if err != nil {
 							logrus.Warnf("match parser: %q", err)
-							goto RETURN
+							matches[t.In(cn).Unix()] = append(matches[t.In(cn).Unix()], Match{
+								isOnGoing: true,
+								vs:        fmt.Sprintf("%s vs %s (%s)", trimText(lp), trimText(rp), versus),
+								series:    strings.TrimSpace(tournament),
+								stream:    []string{"直播源解析失败"},
+							})
+							return
 						}
 						md, err := getMatchDetail(u)
 						if err != nil {
 							logrus.Warnf("fetch match detail: %q", err)
-							goto RETURN
+							matches[t.In(cn).Unix()] = append(matches[t.In(cn).Unix()], Match{
+								isOnGoing: true,
+								vs:        fmt.Sprintf("%s vs %s (%s)", trimText(lp), trimText(rp), versus),
+								series:    strings.TrimSpace(tournament),
+								stream:    []string{"直播源解析失败"},
+							})
+							return
 						}
 						for _, s := range md.GetStreams() {
 							if strings.TrimSpace(s.FmtToMarkdown()) == "" {
@@ -222,15 +229,22 @@ func (mp MatchParser) GetTimeMatches() (map[int64][]Match, error) {
 						}
 					}
 				}
-			RETURN:
 				if len(streams) == 0 {
-					streams = append(streams, "获取直播源失败")
+					streams = append(streams, "直播源解析失败")
+				}
+				vs := strings.Replace(versus, "\n", "", -1)
+				if strings.Contains(vs, "vs") {
+					vs = ""
 				}
 				matches[t.In(cn).Unix()] = append(matches[t.In(cn).Unix()], Match{
 					isOnGoing: true,
-					vs:        fmt.Sprintf("%s vs %s (%s)", trimText(lp), trimText(rp), versus),
-					series:    strings.TrimSpace(tournament),
-					stream:    streams,
+					vs: fmt.Sprintf("%s vs %s (%s)",
+						trimText(lp),
+						trimText(rp),
+						vs,
+					),
+					series: strings.TrimSpace(tournament),
+					stream: streams,
 				})
 			}
 
