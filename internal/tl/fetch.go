@@ -15,6 +15,7 @@ import (
 
 const (
 	timelineCacheKey = "timelines"
+	version          = "revID"
 )
 
 var (
@@ -50,39 +51,6 @@ func NewFetcher(s ...Sender) *Fetcher {
 func (f *Fetcher) Do() error {
 	f.c = NewCron()
 	f.c.c.AddFunc("@every 1m", func() {
-		// do some condition tricks to save bandwidth
-		if f.cache.ItemCount() > 0 {
-			now := time.Now()
-			timeLines, ok := f.cache.Get(timelineCacheKey)
-			if !ok {
-				logrus.Errorf("get timeline cache failed: %s", "no cache key")
-				return
-			}
-			cn, err := time.LoadLocation("Asia/Shanghai")
-			if err != nil {
-				logrus.Errorf("tl load location failed: %s", err.Error())
-				return
-			}
-
-			t := make([]Timeline, 0)
-			if err = json.Unmarshal(timeLines.([]byte), &t); err != nil {
-				logrus.Errorf("unmarshal cache failed: %s", err.Error())
-				return
-			}
-
-			if len(t) == 0 {
-				logrus.Warn("get 0 timelines")
-				return
-			}
-
-			if now.In(cn).Unix() < getTheLastestTimeline(t) {
-				logrus.Infof("now is %d, the lastest match is at %d, no need to refresh cache.",
-					now.In(cn).Unix(), getTheLastestTimeline(t))
-				return
-			}
-		}
-
-		logrus.Infof("warming TL cache...")
 		if err := f.refreshCache(); err != nil {
 			logrus.Errorf("refresh cache failed: %s", err.Error())
 		}
@@ -96,6 +64,14 @@ func (f *Fetcher) refreshCache() error {
 	if err != nil {
 		return err
 	}
+	cacheRevID, ok := f.cache.Get(version)
+	if ok && cacheRevID == p.GetRevID() {
+		return nil
+	}
+	logrus.Infof("LastRevID: %d, CurrentRevID: %d", cacheRevID, p.GetRevID())
+	defer func() {
+		f.cache.Set(version, p.GetRevID(), -1)
+	}()
 	timelines, err := p.GetTimelines()
 	if err != nil {
 		return err
