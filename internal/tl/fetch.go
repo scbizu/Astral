@@ -10,6 +10,7 @@ import (
 
 	cache "github.com/patrickmn/go-cache"
 	"github.com/robfig/cron"
+	"github.com/scylladb/go-set/strset"
 	"github.com/sirupsen/logrus"
 )
 
@@ -86,6 +87,8 @@ func (f *Fetcher) refreshCache() error {
 		return err
 	}
 
+	matches = f.reuseCache(timelines, matches)
+
 	go f.pushMSG(timelines, matches)
 
 	for t, m := range matches {
@@ -94,18 +97,34 @@ func (f *Fetcher) refreshCache() error {
 	return nil
 }
 
-// expireCache reuse the ongoing match info
+// reuseCache reuse the ongoing match info
 // and delete the out-of-date match info
 // Due to the reuseable cache, from now on , we should manage our cache carefully TAT
-func (f *Fetcher) expireCache(tls []Timeline, matches map[int64][]Match) map[int64][]Match {
+func (f *Fetcher) reuseCache(tls []Timeline, matches map[int64][]Match) map[int64][]Match {
 	// reuse cache:
-	// TL will reset Streaming caster URL after the match is going.
-	// We should keep the opening match info until it is closed.
+	// * the same versus infomation
 	for t := range matches {
+		var ms []Match
+		// build caches versus
+		vss := strset.New()
 		cachedMatches, ok := f.cache.Get(strconv.FormatInt(t, 10))
 		if ok {
-			matches[t] = cachedMatches.([]Match)
+			ms, mOK := cachedMatches.([]Match)
+			if !mOK {
+				continue
+			}
+			for _, m := range ms {
+				vss.Add(m.GetVS())
+			}
 		}
+		// filter matches
+		for _, m := range matches[t] {
+			if vss.Has(m.GetVS()) {
+				continue
+			}
+			ms = append(ms, m)
+		}
+		matches[t] = ms
 	}
 
 	if len(tls) == 0 {

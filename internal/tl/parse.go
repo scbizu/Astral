@@ -56,7 +56,7 @@ type TLMatchPage struct {
 const (
 	matchesURL            = `https://liquipedia.net/starcraft2/api.php?action=parse&format=json&page=Liquipedia:Upcoming_and_ongoing_matches`
 	timeFmt               = `January 2, 2006 - 15:04 UTC`
-	maxCountDown          = time.Hour
+	maxCountDown          = 20 * time.Minute
 	matchDetailFromIndex  = 19
 	matchDetailEndIndex   = 21
 	matchDetailPriceIndex = 17
@@ -79,6 +79,10 @@ type Match struct {
 	timeCountingDown string
 	series           string
 	stream           []string
+}
+
+func (m Match) GetVS() string {
+	return m.vs
 }
 
 func (m Match) GetMDMatchInfo() string {

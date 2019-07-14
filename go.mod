@@ -10,6 +10,7 @@ require (
 	github.com/onsi/gomega v1.4.3 // indirect
 	github.com/patrickmn/go-cache v2.1.0+incompatible
 	github.com/robfig/cron v0.0.0-20180505203441-b41be1df6967
+	github.com/scylladb/go-set v1.0.2
 	github.com/sirupsen/logrus v1.0.6
 	github.com/spf13/cobra v0.0.3
 	github.com/spf13/pflag v1.0.2 // indirect
