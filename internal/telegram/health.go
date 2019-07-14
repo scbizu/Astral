@@ -4,9 +4,13 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/go-telegram-bot-api/telegram-bot-api"
+	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 	"github.com/scbizu/Astral/pkg/talker"
 	"github.com/sirupsen/logrus"
+)
+
+const (
+	healthCheckDomian = "https://api.scnace.me/"
 )
 
 func healthCheck(bot *tgbotapi.BotAPI) {
@@ -14,7 +18,7 @@ func healthCheck(bot *tgbotapi.BotAPI) {
 
 	for t := range ticker.C {
 		logrus.Infof("health check at %s", t.String())
-		resp, err := http.Get(tgAPIDomain)
+		resp, err := http.Get(healthCheckDomian)
 		if err != nil {
 			logrus.Errorf("health check failed:%s", err.Error())
 			continue
