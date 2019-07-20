@@ -270,7 +270,12 @@ func (mp MatchParser) GetTimeMatches() (map[int64][]Match, error) {
 }
 
 func GetHTMLMatchesResp() (io.ReadCloser, error) {
-	resp, err := http.Get(matchesURL)
+	req, err := http.NewRequest("GET", matchesURL, nil)
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("User-Agent", "AstralBot(https://github.com/scbizu/Astral)")
+	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
 		return nil, err
 	}

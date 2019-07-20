@@ -51,7 +51,7 @@ func NewFetcher(s ...Sender) *Fetcher {
 
 func (f *Fetcher) Do() error {
 	f.c = NewCron()
-	f.c.c.AddFunc("@every 1m", func() {
+	f.c.c.AddFunc("@every 5m", func() {
 		if err := f.refreshCache(); err != nil {
 			logrus.Errorf("refresh cache failed: %s", err.Error())
 		}
@@ -198,18 +198,4 @@ func split(buf []string, lim int) [][]string {
 		chunks = append(chunks, buf[:len(buf)])
 	}
 	return chunks
-}
-
-func getTheLastestTimeline(tls []Timeline) int64 {
-	sort.SliceStable(tls, func(i, j int) bool {
-		return tls[i].T < tls[j].T
-	})
-
-	for _, tl := range tls {
-		if !tl.IsOnGoing {
-			return tl.T
-		}
-	}
-
-	return 0
 }
