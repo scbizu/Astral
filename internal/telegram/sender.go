@@ -1,6 +1,7 @@
 package telegram
 
 import (
+	"strconv"
 	"strings"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
@@ -31,6 +32,21 @@ func (ts *TGSender) Send(msg string) error {
 		return err
 	}
 	return nil
+}
+
+func (ts *TGSender) SendAndReturnID(msg string) (string, error) {
+	msgConfig := tgbotapi.MessageConfig{
+		BaseChat: tgbotapi.BaseChat{
+			ChannelUsername: CNSC2EventChannelName,
+		},
+		Text:      msg,
+		ParseMode: tgbotapi.ModeMarkdown,
+	}
+	resp, err := ts.bot.Send(msgConfig)
+	if err != nil {
+		return "", err
+	}
+	return strconv.Itoa(resp.MessageID), nil
 }
 
 func (ts *TGSender) ResolveMessage(msgs []string) string {

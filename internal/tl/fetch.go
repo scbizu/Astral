@@ -210,13 +210,14 @@ func (f *Fetcher) pushWithLimit(matches []Match, limit int) {
 			var idx int
 		SEND:
 			msg := dst.ResolveMessage(splitMatchesStr[idx])
-			if err := dst.Send(msg); err != nil {
+			msgID, err := dst.SendAndReturnID(msg)
+			if err != nil {
 				logrus.Errorf("sender: %s", err.Error())
 			}
 			f.Lock()
 			for i, m := range splitMatches[idx] {
 				// TODO: msgid
-				msg := ""
+				msg := msgID
 				f.pushedMatches[m.GetMDMatchInfo()] = PMatch{msgID: msg, matchIndex: i, m: m}
 			}
 			f.Unlock()
