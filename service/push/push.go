@@ -26,7 +26,7 @@ func (ps *PushService) ServePushSC2Event() error {
 	if err != nil {
 		return err
 	}
-	tgSender := telegram.NewTGSender(tgBot)
+	tgSender := telegram.NewTelegram(tgBot)
 	f := tl.NewFetcher(tgSender, discordSender)
 	if err := f.Do(); err != nil {
 		return fmt.Errorf("tl: %s", err.Error())

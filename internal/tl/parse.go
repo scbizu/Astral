@@ -75,14 +75,15 @@ type MatchParser struct {
 
 type Match struct {
 	isOnGoing        bool
-	vs               string
+	vs               Versus
 	timeCountingDown string
 	series           string
 	stream           []string
+	detailURL        *url.URL
 }
 
 func (m Match) GetVS() string {
-	return m.vs
+	return m.vs.f()
 }
 
 func (m Match) GetMDMatchInfo() string {
@@ -172,6 +173,19 @@ func (mp MatchParser) GetTimeMatches() (map[int64][]Match, error) {
 			lp := s.Find(`.team-left`).Text()
 			rp := s.Find(`.team-right`).Text()
 			versus := s.Find(`.versus`).Text()
+			vs := strings.Replace(versus, "\n", "", -1)
+			if strings.Contains(vs, "vs") {
+				vs = ""
+			}
+			score := strings.Split(versus, ":")
+			var s1, s2 string
+			if len(score) == 0 {
+				s1 = "0"
+				s2 = "0"
+			} else {
+				s1 = score[0]
+				s2 = score[1]
+			}
 			t, err := time.Parse(timeFmt, s.Find(`.timer-object-countdown-only`).Text())
 			if err != nil {
 				logrus.Errorf("parse failed: %s", err.Error())
@@ -185,6 +199,7 @@ func (mp MatchParser) GetTimeMatches() (map[int64][]Match, error) {
 			countDown := time.Until(t.In(cn))
 			if int64(countDown) <= 0 {
 				var streams []string
+				var u *url.URL
 				tournament := s.Find(`.match-filler > div`).Text()
 				if tournament == "" {
 					tournament = "未知"
@@ -197,20 +212,31 @@ func (mp MatchParser) GetTimeMatches() (map[int64][]Match, error) {
 						if !ok {
 							matches[t.In(cn).Unix()] = append(matches[t.In(cn).Unix()], Match{
 								isOnGoing: true,
-								vs:        fmt.Sprintf("%s vs %s (%s)", trimText(lp), trimText(rp), versus),
-								series:    strings.TrimSpace(tournament),
-								stream:    []string{"直播源解析失败"},
+								vs: Versus{
+									P1:      trimText(lp),
+									P2:      trimText(rp),
+									P1Score: s1,
+									P2Score: s2,
+								},
+								series: strings.TrimSpace(tournament),
+								stream: []string{"直播源解析失败"},
 							})
 							return
 						}
-						u, err := url.Parse("https://liquipedia.net" + detailURL)
+						var err error
+						u, err = url.Parse("https://liquipedia.net" + detailURL)
 						if err != nil {
 							logrus.Warnf("match parser: %q", err)
 							matches[t.In(cn).Unix()] = append(matches[t.In(cn).Unix()], Match{
 								isOnGoing: true,
-								vs:        fmt.Sprintf("%s vs %s (%s)", trimText(lp), trimText(rp), versus),
-								series:    strings.TrimSpace(tournament),
-								stream:    []string{"直播源解析失败"},
+								vs: Versus{
+									P1:      trimText(lp),
+									P2:      trimText(rp),
+									P1Score: s1,
+									P2Score: s2,
+								},
+								series: strings.TrimSpace(tournament),
+								stream: []string{"直播源解析失败"},
 							})
 							return
 						}
@@ -219,9 +245,14 @@ func (mp MatchParser) GetTimeMatches() (map[int64][]Match, error) {
 							logrus.Warnf("fetch match detail: %q", err)
 							matches[t.In(cn).Unix()] = append(matches[t.In(cn).Unix()], Match{
 								isOnGoing: true,
-								vs:        fmt.Sprintf("%s vs %s (%s)", trimText(lp), trimText(rp), versus),
-								series:    strings.TrimSpace(tournament),
-								stream:    []string{"直播源解析失败"},
+								vs: Versus{
+									P1:      trimText(lp),
+									P2:      trimText(rp),
+									P1Score: s1,
+									P2Score: s2,
+								},
+								series: strings.TrimSpace(tournament),
+								stream: []string{"直播源解析失败"},
 							})
 							return
 						}
@@ -237,19 +268,17 @@ func (mp MatchParser) GetTimeMatches() (map[int64][]Match, error) {
 				if len(streams) == 0 {
 					streams = append(streams, "直播源解析失败")
 				}
-				vs := strings.Replace(versus, "\n", "", -1)
-				if strings.Contains(vs, "vs") {
-					vs = ""
-				}
 				matches[t.In(cn).Unix()] = append(matches[t.In(cn).Unix()], Match{
 					isOnGoing: true,
-					vs: fmt.Sprintf("%s vs %s (%s)",
-						trimText(lp),
-						trimText(rp),
-						vs,
-					),
-					series: strings.TrimSpace(tournament),
-					stream: streams,
+					vs: Versus{
+						P1:      trimText(lp),
+						P2:      trimText(rp),
+						P1Score: s1,
+						P2Score: s2,
+					},
+					series:    strings.TrimSpace(tournament),
+					stream:    streams,
+					detailURL: u,
 				})
 			}
 
@@ -259,8 +288,13 @@ func (mp MatchParser) GetTimeMatches() (map[int64][]Match, error) {
 					tournament = "未知"
 				}
 				matches[t.In(cn).Unix()] = append(matches[t.In(cn).Unix()], Match{
-					isOnGoing:        false,
-					vs:               fmt.Sprintf("%s vs %s", trimText(lp), trimText(rp)),
+					isOnGoing: false,
+					vs: Versus{
+						P1:      trimText(lp),
+						P2:      trimText(rp),
+						P1Score: s1,
+						P2Score: s2,
+					},
 					timeCountingDown: countDown.String(),
 					series:           strings.TrimSpace(tournament),
 				})
@@ -371,4 +405,19 @@ type Stream struct {
 
 func (s Stream) FmtToMarkdown() string {
 	return fmt.Sprintf("[%s](%s)", s.caster, s.streammingURL)
+}
+
+type Versus struct {
+	P1      string
+	P2      string
+	P1Score string
+	P2Score string
+}
+
+func (v Versus) f() string {
+	return fmt.Sprintf("%s vs %s (%s:%s)", v.P1, v.P2, v.P1Score, v.P2Score)
+}
+
+func GetFinalMatchRes(u *url.URL, p1, p2 string) (Versus, error) {
+	return Versus{}, nil
 }

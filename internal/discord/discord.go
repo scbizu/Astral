@@ -85,3 +85,26 @@ func (b *Bot) SendToChannel(channelID string, msg string) error {
 
 	return nil
 }
+
+func (b *Bot) Edit(msgID string, content string) error {
+	return b.editByChannel(config.DiscordCNSC2ChannelID, msgID, content)
+}
+
+func (b *Bot) editByChannel(channelID string, msgID string, content string) error {
+	if err := b.session.Open(); err != nil {
+		return err
+	}
+	defer b.session.Close()
+	if _, err := b.session.ChannelMessageEditEmbed(channelID, msgID, &discordgo.MessageEmbed{
+		Fields: []*discordgo.MessageEmbedField{
+			&discordgo.MessageEmbedField{
+				Name:  "Event Closed",
+				Value: content,
+			},
+		}},
+	); err != nil {
+		return err
+	}
+
+	return nil
+}

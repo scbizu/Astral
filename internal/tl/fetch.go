@@ -39,18 +39,18 @@ func NewCron() *mCron {
 type PMatch struct {
 	msgID      string
 	matchIndex int
-	m          Match
+	rawMatches []Match
 }
 
 type Fetcher struct {
 	c             *mCron
 	cache         *cache.Cache
-	dsts          []Sender
+	dsts          []IRC
 	pushedMatches map[string]PMatch
 	sync.Mutex
 }
 
-func NewFetcher(s ...Sender) *Fetcher {
+func NewFetcher(s ...IRC) *Fetcher {
 	p := make(map[string]PMatch)
 	return &Fetcher{
 		c:             new(mCron),
@@ -62,7 +62,8 @@ func NewFetcher(s ...Sender) *Fetcher {
 
 func (f *Fetcher) Do() error {
 	// run match GC
-	go GetStashChan().Run()
+	go GetStashChan().Run(f.dsts...)
+
 	f.c = NewCron()
 	f.c.c.AddFunc("@every 5m", func() {
 		if err := f.refreshCache(); err != nil {
@@ -213,12 +214,12 @@ func (f *Fetcher) pushWithLimit(matches []Match, limit int) {
 			msgID, err := dst.SendAndReturnID(msg)
 			if err != nil {
 				logrus.Errorf("sender: %s", err.Error())
+				return
 			}
 			f.Lock()
 			for i, m := range splitMatches[idx] {
-				// TODO: msgid
-				msg := msgID
-				f.pushedMatches[m.GetMDMatchInfo()] = PMatch{msgID: msg, matchIndex: i, m: m}
+				mid := msgID
+				f.pushedMatches[m.GetMDMatchInfo()] = PMatch{rawMatches: splitMatches[idx], msgID: mid, matchIndex: i}
 			}
 			f.Unlock()
 			idx++
