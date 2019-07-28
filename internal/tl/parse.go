@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/PuerkitoBio/goquery"
+	"github.com/scylladb/go-set/strset"
 	"github.com/sirupsen/logrus"
 )
 
@@ -419,5 +420,73 @@ func (v Versus) f() string {
 }
 
 func GetFinalMatchRes(u *url.URL, p1, p2 string) (Versus, error) {
-	return Versus{}, nil
+	d, err := goquery.NewDocument(u.String())
+	if err != nil {
+		return Versus{}, err
+	}
+	vs := Versus{}
+	std := strset.New()
+	std.Add(p1, p2)
+	d.Find(`.matchlistslot`).Each(func(index int, s *goquery.Selection) {
+		if trimText(s.Text()) == p1 || trimText(s.Text()) == p2 {
+			row := s.Parent()
+			gets := strset.New()
+			playerScore := make(map[string]string)
+			row.Find(`td`).Each(func(subIndex int, s *goquery.Selection) {
+				switch subIndex {
+				case 0, 2:
+					gets.Add(trimText(s.Text()))
+					// case 1,3
+					playerScore[trimText(s.Text())] = trimText(s.Next().Text())
+				}
+			})
+			if gets.IsEqual(std) {
+				// find in Group Stage
+				vs.P1 = gets.Pop()
+				vs.P2 = gets.Pop()
+				var ok bool
+				vs.P1Score, ok = playerScore[vs.P1]
+				if !ok {
+					vs.P1Score = "0"
+				}
+				vs.P2Score, ok = playerScore[vs.P2]
+				if !ok {
+					vs.P2Score = "0"
+				}
+			}
+		}
+	})
+
+	// Keep always getting the lastest versus info, it will ignore Group Stage versus information, but it is correct.
+	// Playoffs
+	d.Find(`.bracket-cell-r1`).Each(func(index int, s *goquery.Selection) {
+		if strings.Contains(trimText(s.Text()), p1) || strings.Contains(trimText(s.Text()), p2) {
+			row := s.Parent()
+			gets := strset.New()
+			playerScore := make(map[string]string)
+			row.Find(`.bracket-cell-r1`).Each(func(subIndex int, sub *goquery.Selection) {
+				score := trimText(sub.Find(`.bracket-score`).Text())
+				// e.g: TIME0 => map{"TIME":"0"}
+				player := strings.TrimSuffix(trimText(sub.Text()), score)
+				gets.Add(player)
+				playerScore[player] = score
+			})
+
+			if gets.IsEqual(std) {
+				vs.P1 = gets.Pop()
+				vs.P2 = gets.Pop()
+				var ok bool
+				vs.P1Score, ok = playerScore[vs.P1]
+				if !ok {
+					vs.P1Score = "0"
+				}
+				vs.P2Score, ok = playerScore[vs.P2]
+				if !ok {
+					vs.P2Score = "0"
+				}
+			}
+		}
+	})
+
+	return vs, nil
 }
