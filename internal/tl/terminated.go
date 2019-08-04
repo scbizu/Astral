@@ -48,8 +48,8 @@ func (s Stash) Run(ircs ...IRC) {
 			}
 			for _, irc := range ircs {
 				content := irc.ResolveMessage(strs)
-				if err := irc.Edit(msg.msgID, content); err != nil {
-					logrus.Errorf("update message: %q", err)
+				if err := irc.Send(content); err != nil {
+					logrus.Errorf("send FIN message: %q", err)
 					continue
 				}
 			}
