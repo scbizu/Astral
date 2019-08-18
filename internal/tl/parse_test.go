@@ -3,6 +3,7 @@ package tl
 import (
 	"bytes"
 	"io/ioutil"
+	"net/url"
 	"testing"
 	"time"
 
@@ -76,4 +77,22 @@ func TestParseTS(t *testing.T) {
 	}
 	countDown := time.Until(ti.In(cn))
 	t.Log(int(countDown))
+}
+
+func TestGetFinalMatchRes(t *testing.T) {
+	u, err := url.Parse("https://liquipedia.net/starcraft2/BSL_Royal_Rumble")
+	if err != nil {
+		t.Fatal(err)
+	}
+	p1 := "IlPrincipino"
+	p2 := "Numi"
+	v, err := GetFinalMatchRes(u, p1, p2)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if v.P1Score == "0" && v.P2Score == "1" {
+		return
+	}
+	t.Errorf("get score not expect, versus %+#v", v)
+	return
 }

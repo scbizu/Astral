@@ -1,6 +1,7 @@
 package telegram
 
 import (
+	"strconv"
 	"strings"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
@@ -11,15 +12,15 @@ const (
 	CNSC2EventChannelName = "@CNSC2EventChannel"
 )
 
-func NewTGSender(bot *Bot) *TGSender {
-	return &TGSender{bot}
+func NewTelegram(bot *Bot) *Telegram {
+	return &Telegram{bot}
 }
 
-type TGSender struct {
+type Telegram struct {
 	*Bot
 }
 
-func (ts *TGSender) Send(msg string) error {
+func (ts *Telegram) Send(msg string) error {
 	msgConfig := tgbotapi.MessageConfig{
 		BaseChat: tgbotapi.BaseChat{
 			ChannelUsername: CNSC2EventChannelName,
@@ -33,6 +34,21 @@ func (ts *TGSender) Send(msg string) error {
 	return nil
 }
 
-func (ts *TGSender) ResolveMessage(msgs []string) string {
+func (ts *Telegram) SendAndReturnID(msg string) (string, error) {
+	msgConfig := tgbotapi.MessageConfig{
+		BaseChat: tgbotapi.BaseChat{
+			ChannelUsername: CNSC2EventChannelName,
+		},
+		Text:      msg,
+		ParseMode: tgbotapi.ModeMarkdown,
+	}
+	resp, err := ts.bot.Send(msgConfig)
+	if err != nil {
+		return "", err
+	}
+	return strconv.Itoa(resp.MessageID), nil
+}
+
+func (ts *Telegram) ResolveMessage(msgs []string) string {
 	return strings.Join(msgs, "\n\n")
 }

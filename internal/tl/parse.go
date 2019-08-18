@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/PuerkitoBio/goquery"
+	"github.com/scylladb/go-set/strset"
 	"github.com/sirupsen/logrus"
 )
 
@@ -75,14 +76,15 @@ type MatchParser struct {
 
 type Match struct {
 	isOnGoing        bool
-	vs               string
+	vs               Versus
 	timeCountingDown string
 	series           string
 	stream           []string
+	detailURL        *url.URL
 }
 
 func (m Match) GetVS() string {
-	return m.vs
+	return m.vs.f()
 }
 
 func (m Match) GetMDMatchInfo() string {
@@ -172,6 +174,19 @@ func (mp MatchParser) GetTimeMatches() (map[int64][]Match, error) {
 			lp := s.Find(`.team-left`).Text()
 			rp := s.Find(`.team-right`).Text()
 			versus := s.Find(`.versus`).Text()
+			vs := strings.Replace(versus, "\n", "", -1)
+			if strings.Contains(vs, "vs") {
+				vs = ""
+			}
+			score := strings.Split(versus, ":")
+			var s1, s2 string
+			if len(score) == 0 {
+				s1 = "0"
+				s2 = "0"
+			} else {
+				s1 = score[0]
+				s2 = score[1]
+			}
 			t, err := time.Parse(timeFmt, s.Find(`.timer-object-countdown-only`).Text())
 			if err != nil {
 				logrus.Errorf("parse failed: %s", err.Error())
@@ -185,6 +200,7 @@ func (mp MatchParser) GetTimeMatches() (map[int64][]Match, error) {
 			countDown := time.Until(t.In(cn))
 			if int64(countDown) <= 0 {
 				var streams []string
+				var u *url.URL
 				tournament := s.Find(`.match-filler > div`).Text()
 				if tournament == "" {
 					tournament = "未知"
@@ -197,20 +213,31 @@ func (mp MatchParser) GetTimeMatches() (map[int64][]Match, error) {
 						if !ok {
 							matches[t.In(cn).Unix()] = append(matches[t.In(cn).Unix()], Match{
 								isOnGoing: true,
-								vs:        fmt.Sprintf("%s vs %s (%s)", trimText(lp), trimText(rp), versus),
-								series:    strings.TrimSpace(tournament),
-								stream:    []string{"直播源解析失败"},
+								vs: Versus{
+									P1:      trimText(lp),
+									P2:      trimText(rp),
+									P1Score: s1,
+									P2Score: s2,
+								},
+								series: strings.TrimSpace(tournament),
+								stream: []string{"直播源解析失败"},
 							})
 							return
 						}
-						u, err := url.Parse("https://liquipedia.net" + detailURL)
+						var err error
+						u, err = url.Parse("https://liquipedia.net" + detailURL)
 						if err != nil {
 							logrus.Warnf("match parser: %q", err)
 							matches[t.In(cn).Unix()] = append(matches[t.In(cn).Unix()], Match{
 								isOnGoing: true,
-								vs:        fmt.Sprintf("%s vs %s (%s)", trimText(lp), trimText(rp), versus),
-								series:    strings.TrimSpace(tournament),
-								stream:    []string{"直播源解析失败"},
+								vs: Versus{
+									P1:      trimText(lp),
+									P2:      trimText(rp),
+									P1Score: s1,
+									P2Score: s2,
+								},
+								series: strings.TrimSpace(tournament),
+								stream: []string{"直播源解析失败"},
 							})
 							return
 						}
@@ -219,9 +246,14 @@ func (mp MatchParser) GetTimeMatches() (map[int64][]Match, error) {
 							logrus.Warnf("fetch match detail: %q", err)
 							matches[t.In(cn).Unix()] = append(matches[t.In(cn).Unix()], Match{
 								isOnGoing: true,
-								vs:        fmt.Sprintf("%s vs %s (%s)", trimText(lp), trimText(rp), versus),
-								series:    strings.TrimSpace(tournament),
-								stream:    []string{"直播源解析失败"},
+								vs: Versus{
+									P1:      trimText(lp),
+									P2:      trimText(rp),
+									P1Score: s1,
+									P2Score: s2,
+								},
+								series: strings.TrimSpace(tournament),
+								stream: []string{"直播源解析失败"},
 							})
 							return
 						}
@@ -237,19 +269,17 @@ func (mp MatchParser) GetTimeMatches() (map[int64][]Match, error) {
 				if len(streams) == 0 {
 					streams = append(streams, "直播源解析失败")
 				}
-				vs := strings.Replace(versus, "\n", "", -1)
-				if strings.Contains(vs, "vs") {
-					vs = ""
-				}
 				matches[t.In(cn).Unix()] = append(matches[t.In(cn).Unix()], Match{
 					isOnGoing: true,
-					vs: fmt.Sprintf("%s vs %s (%s)",
-						trimText(lp),
-						trimText(rp),
-						vs,
-					),
-					series: strings.TrimSpace(tournament),
-					stream: streams,
+					vs: Versus{
+						P1:      trimText(lp),
+						P2:      trimText(rp),
+						P1Score: s1,
+						P2Score: s2,
+					},
+					series:    strings.TrimSpace(tournament),
+					stream:    streams,
+					detailURL: u,
 				})
 			}
 
@@ -259,8 +289,13 @@ func (mp MatchParser) GetTimeMatches() (map[int64][]Match, error) {
 					tournament = "未知"
 				}
 				matches[t.In(cn).Unix()] = append(matches[t.In(cn).Unix()], Match{
-					isOnGoing:        false,
-					vs:               fmt.Sprintf("%s vs %s", trimText(lp), trimText(rp)),
+					isOnGoing: false,
+					vs: Versus{
+						P1:      trimText(lp),
+						P2:      trimText(rp),
+						P1Score: s1,
+						P2Score: s2,
+					},
 					timeCountingDown: countDown.String(),
 					series:           strings.TrimSpace(tournament),
 				})
@@ -371,4 +406,90 @@ type Stream struct {
 
 func (s Stream) FmtToMarkdown() string {
 	return fmt.Sprintf("[%s](%s)", s.caster, s.streammingURL)
+}
+
+type Versus struct {
+	P1      string
+	P2      string
+	P1Score string
+	P2Score string
+}
+
+func (v Versus) f() string {
+	return fmt.Sprintf("%s vs %s (%s:%s)", v.P1, v.P2, v.P1Score, v.P2Score)
+}
+
+func GetFinalMatchRes(u *url.URL, p1, p2 string) (Versus, error) {
+	d, err := goquery.NewDocument(u.String())
+	if err != nil {
+		return Versus{}, err
+	}
+	vs := Versus{}
+	std := strset.New()
+	std.Add(p1, p2)
+	d.Find(`.matchlistslot`).Each(func(index int, s *goquery.Selection) {
+		if trimText(s.Text()) == p1 || trimText(s.Text()) == p2 {
+			row := s.Parent()
+			gets := strset.New()
+			playerScore := make(map[string]string)
+			row.Find(`td`).Each(func(subIndex int, s *goquery.Selection) {
+				switch subIndex {
+				case 0, 2:
+					gets.Add(trimText(s.Text()))
+					// case 1,3
+					playerScore[trimText(s.Text())] = trimText(s.Next().Text())
+				}
+			})
+			if gets.IsEqual(std) {
+				// find in Group Stage
+				vs.P1 = gets.Pop()
+				vs.P2 = gets.Pop()
+				var ok bool
+				vs.P1Score, ok = playerScore[vs.P1]
+				if !ok {
+					vs.P1Score = "0"
+				}
+				vs.P2Score, ok = playerScore[vs.P2]
+				if !ok {
+					vs.P2Score = "0"
+				}
+			}
+		}
+	})
+
+	// Keep always getting the lastest versus info, it will ignore Group Stage versus information, but it is correct.
+	// Playoffs
+	d.Find(`.bracket-cell-r1`).Each(func(index int, s *goquery.Selection) {
+		if index%2 == 0 {
+			return
+		}
+		if strings.Contains(trimText(s.Text()), p1) || strings.Contains(trimText(s.Text()), p2) {
+			row := s.Parent()
+			gets := strset.New()
+			playerScore := make(map[string]string)
+			row.Find(`.bracket-cell-r1`).Each(func(subIndex int, sub *goquery.Selection) {
+				score := trimText(sub.Find(`.bracket-score`).Text())
+				// e.g: TIME0 => map{"TIME":"0"}
+				player := strings.TrimSuffix(trimText(sub.Text()), score)
+				gets.Add(player)
+				playerScore[player] = score
+			})
+
+			if gets.IsEqual(std) {
+				vs.P1 = gets.Pop()
+				vs.P2 = gets.Pop()
+				var ok bool
+				vs.P1Score, ok = playerScore[vs.P1]
+				if !ok {
+					vs.P1Score = "0"
+				}
+				vs.P2Score, ok = playerScore[vs.P2]
+				if !ok {
+					vs.P2Score = "0"
+				}
+			}
+		}
+	})
+
+	return vs, nil
 }
