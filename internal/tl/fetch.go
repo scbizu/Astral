@@ -61,7 +61,7 @@ func NewFetcher(s ...IRC) *Fetcher {
 }
 
 func (f *Fetcher) Do() error {
-	// run match GC
+	// register match terminated runner
 	go GetStashChan().Run(f.dsts...)
 
 	f.c = NewCron()
@@ -219,7 +219,11 @@ func (f *Fetcher) pushWithLimit(matches []Match, limit int) {
 			f.Lock()
 			for i, m := range splitMatches[idx] {
 				mid := msgID
-				f.pushedMatches[m.GetMDMatchInfo()] = PMatch{rawMatches: splitMatches[idx], msgID: mid, matchIndex: i}
+				f.pushedMatches[m.GetMDMatchInfo()] = PMatch{
+					rawMatches: splitMatches[idx],
+					msgID:      mid,
+					matchIndex: i,
+				}
 			}
 			f.Unlock()
 			idx++

@@ -460,6 +460,9 @@ func GetFinalMatchRes(u *url.URL, p1, p2 string) (Versus, error) {
 	// Keep always getting the lastest versus info, it will ignore Group Stage versus information, but it is correct.
 	// Playoffs
 	d.Find(`.bracket-cell-r1`).Each(func(index int, s *goquery.Selection) {
+		if index%2 == 0 {
+			return
+		}
 		if strings.Contains(trimText(s.Text()), p1) || strings.Contains(trimText(s.Text()), p2) {
 			row := s.Parent()
 			gets := strset.New()
