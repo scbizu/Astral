@@ -5,7 +5,7 @@ ADD . /project/Astral
 
 RUN export GO11MODULE="on" && cd /project/Astral && go mod download && go build .
 
-FROM alpine:lastest
+FROM alpine:latest
 
 WORKDIR /Astral
 
