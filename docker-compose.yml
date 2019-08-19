@@ -1,36 +1,26 @@
-AstralCommandService:
-  image: scnace/astral:lastest
-  restart: always
-  ports:
-  - 8443:8443
-  environment:
-  - BOTKEY={$BOTKEY}
-  - LISTENPORT={$LISTENPORT}
-  command:
-  - /bin/sh
-  - -c
-  - "cd /Astral \n./Astral service Command\n"
-
-AstralServerMessage:
-  image: scnace/astral:lastest
-  restart: always
-  ports:
-  - 8444:8444
-  environment:
-  - BOTKEY={$BOTKEY}
-  - LISTENPORT={$LISTENPORT}
-  command:
-  - /bin/sh
-  - -c
-  - "cd /Astral \n./Astral service AstralServerMessage\n"
-
-AstralSC2EventInfo:
-  image: scnace/astral:lastest
-  restart: always
-  environment:
-  - BOTKEY={$BOTKEY}
-  - ASTRAL_DISCORD_CLIENT_ID={$ASTRAL_DISCORD_CLIENT_ID}
-  command:
-  - /bin/sh
-  - -c
-  - "cd /Astral \n./Astral service SC2EventInfo\n"
+version: "3"
+services:
+  AstralCommandService:
+    image: scnace/astral:local
+    container_name: command_service
+    restart: always
+    ports:
+    - 8443:8443
+    environment:
+    - BOTKEY=${BOTKEY}
+    - LISTENPORT=${LISTENPORT}
+    command:
+    - /bin/sh
+    - -c
+    - "/Astral/astral service Command\n"
+  AstralSC2EventInfo:
+    image: scnace/astral:local
+    container_name: starcraft2_event
+    restart: always
+    environment:
+    - BOTKEY=${BOTKEY}
+    - ASTRAL_DISCORD_CLIENT_ID=${ASTRAL_DISCORD_CLIENT_ID}
+    command:
+    - /bin/sh
+    - -c
+    - "/Astral/astral service SC2EventInfo\n"
