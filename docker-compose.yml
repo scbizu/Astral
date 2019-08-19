@@ -1,5 +1,5 @@
 AstralCommandService:
-  image: daocloud.io/scbizu/astral:master
+  image: scnace/astral:lastest
   restart: always
   ports:
   - 8443:8443
@@ -9,10 +9,10 @@ AstralCommandService:
   command:
   - /bin/sh
   - -c
-  - "cd project/Astral \n./Astral service Command\n"
+  - "cd /Astral \n./Astral service Command\n"
 
 AstralServerMessage:
-  image: daocloud.io/scbizu/astral:master
+  image: scnace/astral:lastest
   restart: always
   ports:
   - 8444:8444
@@ -22,10 +22,10 @@ AstralServerMessage:
   command:
   - /bin/sh
   - -c
-  - "cd project/Astral \n./Astral service AstralServerMessage\n"
+  - "cd /Astral \n./Astral service AstralServerMessage\n"
 
 AstralSC2EventInfo:
-  image: daocloud.io/scbizu/astral:master
+  image: scnace/astral:lastest
   restart: always
   environment:
   - BOTKEY={$BOTKEY}
@@ -33,4 +33,4 @@ AstralSC2EventInfo:
   command:
   - /bin/sh
   - -c
-  - "cd project/Astral \n./Astral service SC2EventInfo\n"
+  - "cd /Astral \n./Astral service SC2EventInfo\n"
