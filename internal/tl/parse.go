@@ -180,7 +180,7 @@ func (mp MatchParser) GetTimeMatches() (map[int64][]Match, error) {
 			}
 			score := strings.Split(versus, ":")
 			var s1, s2 string
-			if len(score) == 0 {
+			if len(score) < 2 {
 				s1 = "0"
 				s2 = "0"
 			} else {
