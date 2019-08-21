@@ -1,7 +1,7 @@
 version: "3"
 services:
   AstralCommandService:
-    image: scnace/astral:local
+    image: scnace/astral:latest
     container_name: command_service
     restart: always
     ports:
@@ -14,7 +14,7 @@ services:
     - -c
     - "/Astral/astral service Command\n"
   AstralSC2EventInfo:
-    image: scnace/astral:local
+    image: scnace/astral:latest
     container_name: starcraft2_event
     restart: always
     environment:
