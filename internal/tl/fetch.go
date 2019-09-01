@@ -12,6 +12,7 @@ import (
 
 	cache "github.com/patrickmn/go-cache"
 	"github.com/robfig/cron"
+	"github.com/scbizu/Astral/internal/mcache"
 	"github.com/scylladb/go-set/strset"
 	"github.com/sirupsen/logrus"
 )
@@ -61,9 +62,16 @@ func NewFetcher(s ...IRC) *Fetcher {
 	}
 }
 
-func (f *Fetcher) Do() error {
+func (f *Fetcher) Register() {
 	// register match terminated runner
 	go GetStashChan().Run(f.dsts...)
+	// register match message cache
+	mcache.EnableMessageCache()
+}
+
+func (f *Fetcher) Do() error {
+
+	f.Register()
 
 	f.c = NewCron()
 	if err := f.c.c.AddFunc("@every 5m", func() {
@@ -214,7 +222,7 @@ func (f *Fetcher) pushWithLimit(matches []Match, limit int) {
 			var idx int
 		SEND:
 			msg := dst.ResolveMessage(splitMatchesStr[idx])
-			msgID, err := dst.SendAndReturnID(msg)
+			msgID, err := dst.SendAndReturnID(msg, CacheMessageFilter{})
 			if err != nil {
 				logrus.Errorf("sender: %s", err.Error())
 				return
@@ -227,6 +235,10 @@ func (f *Fetcher) pushWithLimit(matches []Match, limit int) {
 					msgID:      mid,
 					matchIndex: i,
 				}
+			}
+			if err := mcache.AddMessage(msg, mcache.MD5{}); err != nil {
+				logrus.Errorf("mcache: set cache: %q", err)
+				// ignore and fallthrough
 			}
 			f.Unlock()
 			idx++

@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
+	"github.com/scbizu/Astral/internal/tl"
 )
 
 const (
@@ -20,7 +21,13 @@ type Telegram struct {
 	*Bot
 }
 
-func (ts *Telegram) Send(msg string) error {
+func (ts *Telegram) Send(msg string, fs ...tl.Filter) error {
+	for _, f := range fs {
+		msg = f.F(msg)
+	}
+	if msg == "" {
+		return nil
+	}
 	msgConfig := tgbotapi.MessageConfig{
 		BaseChat: tgbotapi.BaseChat{
 			ChannelUsername: CNSC2EventChannelName,
@@ -34,7 +41,13 @@ func (ts *Telegram) Send(msg string) error {
 	return nil
 }
 
-func (ts *Telegram) SendAndReturnID(msg string) (string, error) {
+func (ts *Telegram) SendAndReturnID(msg string, fs ...tl.Filter) (string, error) {
+	for _, f := range fs {
+		msg = f.F(msg)
+	}
+	if msg == "" {
+		return "", nil
+	}
 	msgConfig := tgbotapi.MessageConfig{
 		BaseChat: tgbotapi.BaseChat{
 			ChannelUsername: CNSC2EventChannelName,

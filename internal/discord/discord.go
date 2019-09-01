@@ -7,6 +7,7 @@ import (
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/scbizu/Astral/internal/config"
+	"github.com/scbizu/Astral/internal/tl"
 )
 
 type Bot struct {
@@ -31,7 +32,13 @@ func (b *Bot) teardown() {
 	b.Unlock()
 }
 
-func (b *Bot) Send(msg string) error {
+func (b *Bot) Send(msg string, fs ...tl.Filter) error {
+	for _, f := range fs {
+		msg = f.F(msg)
+	}
+	if msg == "" {
+		return nil
+	}
 	b.Lock()
 	if err := b.session.Open(); err != nil {
 		return err
@@ -53,7 +60,13 @@ func (b *Bot) Send(msg string) error {
 	return nil
 }
 
-func (b *Bot) SendAndReturnID(msg string) (string, error) {
+func (b *Bot) SendAndReturnID(msg string, fs ...tl.Filter) (string, error) {
+	for _, f := range fs {
+		msg = f.F(msg)
+	}
+	if msg == "" {
+		return "", nil
+	}
 	b.Lock()
 	if err := b.session.Open(); err != nil {
 		return "", err

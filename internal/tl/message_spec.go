@@ -1,9 +1,13 @@
 package tl
 
+type Filter interface {
+	F(string) string
+}
+
 type Sender interface {
-	Send(string) error
+	Send(string, ...Filter) error
+	SendAndReturnID(string, ...Filter) (string, error)
 	ResolveMessage([]string) string
-	SendAndReturnID(string) (string, error)
 }
 
 type Editor interface {
