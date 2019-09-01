@@ -3,6 +3,7 @@ package discord
 import (
 	"fmt"
 	"strings"
+	"sync"
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/scbizu/Astral/internal/config"
@@ -10,6 +11,7 @@ import (
 
 type Bot struct {
 	session *discordgo.Session
+	sync.Mutex
 }
 
 func NewBot() (*Bot, error) {
@@ -24,11 +26,18 @@ func (b *Bot) ResolveMessage(msgs []string) string {
 	return fmt.Sprintf("%s\n\n", strings.Join(msgs, "\n\n"))
 }
 
+func (b *Bot) teardown() {
+	b.session.Close()
+	b.Unlock()
+}
+
 func (b *Bot) Send(msg string) error {
+	b.Lock()
 	if err := b.session.Open(); err != nil {
 		return err
 	}
-	defer b.session.Close()
+	defer b.teardown()
+
 	if _, err := b.session.ChannelMessageSendEmbed(
 		config.DiscordCNSC2ChannelID,
 		&discordgo.MessageEmbed{
@@ -45,10 +54,11 @@ func (b *Bot) Send(msg string) error {
 }
 
 func (b *Bot) SendAndReturnID(msg string) (string, error) {
+	b.Lock()
 	if err := b.session.Open(); err != nil {
 		return "", err
 	}
-	defer b.session.Close()
+	defer b.teardown()
 	resp, err := b.session.ChannelMessageSendEmbed(
 		config.DiscordCNSC2ChannelID,
 		&discordgo.MessageEmbed{
@@ -66,10 +76,11 @@ func (b *Bot) SendAndReturnID(msg string) (string, error) {
 }
 
 func (b *Bot) SendToChannel(channelID string, msg string) error {
+	b.Lock()
 	if err := b.session.Open(); err != nil {
 		return err
 	}
-	defer b.session.Close()
+	defer b.teardown()
 	if _, err := b.session.ChannelMessageSendEmbed(
 		channelID,
 		&discordgo.MessageEmbed{
@@ -91,10 +102,11 @@ func (b *Bot) Edit(msgID string, content string) error {
 }
 
 func (b *Bot) editByChannel(channelID string, msgID string, content string) error {
+	b.Lock()
 	if err := b.session.Open(); err != nil {
 		return err
 	}
-	defer b.session.Close()
+	defer b.teardown()
 	if _, err := b.session.ChannelMessageEditEmbed(channelID, msgID, &discordgo.MessageEmbed{
 		Fields: []*discordgo.MessageEmbedField{
 			&discordgo.MessageEmbedField{
