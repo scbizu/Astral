@@ -2,15 +2,12 @@ package telegram
 
 import (
 	"fmt"
-	"io/ioutil"
 	"net/http"
 	"os"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 	"github.com/scbizu/Astral/internal/plugin/hub"
 	"github.com/scbizu/Astral/pkg/getcert"
-	"github.com/scbizu/Astral/pkg/talker"
-	"github.com/scbizu/Astral/pkg/talker/dce"
 	"github.com/sirupsen/logrus"
 )
 
@@ -90,10 +87,6 @@ func (b *Bot) ServeBotUpdateMessage() error {
 	return nil
 }
 
-func (b *Bot) ServePushAstralServerMessage() {
-	go healthCheck(b.bot)
-	registerDCEServer(b.bot)
-}
 
 func isMsgNewMember(update tgbotapi.Update) ([]string, bool) {
 	members := update.Message.NewChatMembers
@@ -123,54 +116,4 @@ func isMsgBadRequest(msg tgbotapi.MessageConfig) bool {
 		return true
 	}
 	return false
-}
-
-func registerDCEServer(bot *tgbotapi.BotAPI) {
-	dceListenHandler := func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodPost {
-			r.ParseForm()
-			body, err := ioutil.ReadAll(r.Body)
-			if err != nil {
-				logrus.Errorf("dce: read webhook msg failed: %q", err.Error())
-				w.WriteHeader(http.StatusInternalServerError)
-				w.Write([]byte(err.Error()))
-				return
-			}
-			defer r.Body.Close()
-
-			logrus.Debugf("dce webhook: %s", string(body))
-
-			dceObj, err := dce.NewDCEObj(string(body))
-			if err != nil {
-				logrus.Errorf("dce: read webhook msg failed: %q", err.Error())
-				w.WriteHeader(http.StatusInternalServerError)
-				w.Write([]byte(err.Error()))
-				return
-			}
-			msgConfig := tgbotapi.MessageConfig{
-				BaseChat: tgbotapi.BaseChat{
-					ChannelUsername: talker.ChannelName,
-				},
-				Text:      dceObj.Fmt(),
-				ParseMode: tgbotapi.ModeMarkdown,
-			}
-			respMsg, err := bot.Send(msgConfig)
-			if err != nil {
-				logrus.Errorf("telegram bot: send server info failed: %q", err.Error())
-				return
-			}
-
-			w.WriteHeader(http.StatusOK)
-			w.Write([]byte(respMsg.Text))
-		} else {
-			w.WriteHeader(http.StatusForbidden)
-			w.Write([]byte("Astral has denied your request"))
-		}
-	}
-
-	http.HandleFunc("/alert/dce", dceListenHandler)
-
-	port := fmt.Sprintf(":%s", os.Getenv("LISTENPORT"))
-
-	http.ListenAndServe(port, nil)
 }

@@ -39,22 +39,6 @@ var CommandService = &cobra.Command{
 	},
 }
 
-// ServerInfoService defines autopush astral server channel message service
-var ServerInfoService = &cobra.Command{
-	Use:   "AstralServerMessage",
-	Short: "Astral server message service",
-	Run: func(cmd *cobra.Command, args []string) {
-		bot, err := telegram.NewBot(false)
-		if err != nil {
-			logrus.Fatal(err)
-			return
-		}
-
-		bot.ServePushAstralServerMessage()
-		return
-	},
-}
-
 // CNSC2EventInfoService defines autopush CNSC2Event channle message service
 var CNSC2EventInfoService = &cobra.Command{
 	Use:   "SC2EventInfo",
@@ -70,7 +54,6 @@ var CNSC2EventInfoService = &cobra.Command{
 //Execute exec astral
 func Execute() (err error) {
 	ServiceCmd.AddCommand(CommandService)
-	ServiceCmd.AddCommand(ServerInfoService)
 	ServiceCmd.AddCommand(CNSC2EventInfoService)
 	AstralCmd.AddCommand(ServiceCmd)
 	return AstralCmd.Execute()
