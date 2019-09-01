@@ -23,7 +23,6 @@ func (s Stash) Run(ircs ...IRC) {
 	for {
 		select {
 		case msg := <-s:
-			// TODO: terminated the match
 			match := msg.rawMatches[msg.matchIndex]
 			vs, err := GetFinalMatchRes(match.detailURL, match.vs.P1, match.vs.P2)
 			if err != nil {
@@ -36,11 +35,10 @@ func (s Stash) Run(ircs ...IRC) {
 				}
 			}
 			msg.rawMatches[msg.matchIndex] = Match{
-				isOnGoing:        match.isOnGoing,
+				isOnGoing:        false,
 				vs:               vs,
-				timeCountingDown: match.timeCountingDown,
+				timeCountingDown: "已结束",
 				series:           match.series,
-				stream:           match.stream,
 			}
 			var strs []string
 			for _, m := range msg.rawMatches {

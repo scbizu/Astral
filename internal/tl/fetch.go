@@ -4,6 +4,7 @@ package tl
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"sort"
 	"strconv"
 	"sync"
@@ -65,11 +66,13 @@ func (f *Fetcher) Do() error {
 	go GetStashChan().Run(f.dsts...)
 
 	f.c = NewCron()
-	f.c.c.AddFunc("@every 5m", func() {
+	if err := f.c.c.AddFunc("@every 5m", func() {
 		if err := f.refreshCache(); err != nil {
 			logrus.Errorf("refresh cache failed: %s", err.Error())
 		}
-	})
+	}); err != nil {
+		return fmt.Errorf("cron: %q", err)
+	}
 	f.c.c.Run()
 	return nil
 }

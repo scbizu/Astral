@@ -91,7 +91,7 @@ func (m Match) GetMDMatchInfo() string {
 	if m.isOnGoing {
 		return fmt.Sprintf(" 【🐔 比赛对阵】 %s \n 【🏆 所属杯赛】 %s \n 【📺 比赛直播】 %s", m.vs.f(), m.series, strings.Join(m.stream, "/"))
 	}
-	return fmt.Sprintf(" 【🐔 比赛对阵】 %s \n 【🏆 所属杯赛】 %s \n 【⏳ 比赛状态】 倒计时 %s", m.vs.f(), m.series, m.timeCountingDown)
+	return fmt.Sprintf(" 【🐔 比赛对阵】 %s \n 【🏆 所属杯赛】 %s \n 【⏳ 比赛状态】 %s", m.vs.f(), m.series, m.timeCountingDown)
 }
 
 func (m Match) GetJSONMatchInfo() (string, error) {
