@@ -112,12 +112,22 @@ func (f *Fetcher) refreshCache() error {
 		return err
 	}
 
-	matches = f.reuseCache(timelines, matches)
+	// matches = f.reuseCache(timelines, matches)
 
 	go f.pushMSG(timelines, matches)
 
-	for t, m := range matches {
-		f.cache.Set(strconv.FormatInt(t, 10), m, -1)
+	for t, ms := range matches {
+		// last  match  is terminated
+		if _, ok := f.cache.Get(strconv.FormatInt(t, 10)); !ok {
+			for key, pm := range f.pushedMatches {
+				GetStashChan().Put(pm)
+				// terminated
+				f.Lock()
+				delete(f.pushedMatches, key)
+				f.Unlock()
+			}
+		}
+		f.cache.Set(strconv.FormatInt(t, 10), ms, -1)
 	}
 	return nil
 }
@@ -161,20 +171,9 @@ func (f *Fetcher) reuseCache(tls []Timeline, matches map[int64][]Match) map[int6
 	})
 
 	// expire cache : T is less than the index 0 (the lowest one)
-	for t, ms := range matches {
+	for t := range matches {
 		if t >= tls[0].T {
 			continue
-		}
-		for _, m := range ms {
-			pm, ok := f.pushedMatches[m.GetMDMatchInfo()]
-			if !ok {
-				continue
-			}
-			GetStashChan().Put(pm)
-			// terminated
-			f.Lock()
-			delete(f.pushedMatches, m.GetMDMatchInfo())
-			f.Unlock()
 		}
 		delete(matches, t)
 		f.cache.Delete(strconv.FormatInt(t, 10))
