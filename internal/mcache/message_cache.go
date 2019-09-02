@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/sirupsen/logrus"
 	"github.com/patrickmn/go-cache"
 )
 
@@ -41,11 +42,16 @@ func AddMessage(msg string, h Hasher) error {
 	return nil
 }
 
-func IsMessageSet(name string) bool {
+func IsMessageSet(msg string, h Hasher) bool {
 	if !IsMessageCacheEnable() {
 		return false
 	}
-	_, ok := messageCache.Get(getMessageKey(name))
+	sum, err := h.Hash(msg)
+	if err != nil {
+		logrus.Errorf("mcache: hash: %q", err)
+		return false
+	}
+	_, ok := messageCache.Get(getMessageKey(sum))
 	return ok
 }
 
