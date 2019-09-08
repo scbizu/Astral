@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/sirupsen/logrus"
 	"github.com/patrickmn/go-cache"
+	"github.com/sirupsen/logrus"
 )
 
 const (
@@ -17,7 +17,7 @@ const (
 var messageCache *cache.Cache
 
 func EnableMessageCache() {
-	messageCache = cache.New(time.Hour, 2*time.Hour)
+	messageCache = cache.New(6*time.Hour, 6*time.Hour)
 }
 
 func IsMessageCacheEnable() bool {
@@ -36,7 +36,7 @@ func AddMessage(msg string, h Hasher) error {
 	if err != nil {
 		return err
 	}
-	if err := messageCache.Add(getMessageKey(sum), "", time.Hour); err != nil {
+	if err := messageCache.Add(getMessageKey(sum), "", 6*time.Hour); err != nil {
 		return err
 	}
 	return nil
