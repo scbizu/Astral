@@ -2,7 +2,7 @@ package tl
 
 import "github.com/sirupsen/logrus"
 
-type Stash chan PMatch
+type Stash chan Match
 
 var (
 	stashMatchChan Stash
@@ -10,42 +10,30 @@ var (
 
 func GetStashChan() Stash {
 	if stashMatchChan == nil {
-		stashMatchChan = make(chan PMatch)
+		stashMatchChan = make(chan Match)
 	}
 	return stashMatchChan
 }
 
-func (s Stash) Put(m PMatch) {
+func (s Stash) Put(m Match) {
 	s <- m
 }
 
 func (s Stash) Run(ircs ...IRC) {
 	for {
 		select {
-		case msg := <-s:
-			match := msg.rawMatches[msg.matchIndex]
+		case match := <-s:
 			vs, err := GetFinalMatchRes(match.detailURL, match.vs.P1, match.vs.P2)
 			if err != nil {
 				logrus.Warnf("update message: %q", err)
-				vs = Versus{
-					P1:      match.vs.P1,
-					P2:      match.vs.P2,
-					P1Score: match.vs.P1Score,
-					P2Score: match.vs.P2Score,
-				}
+				continue
 			}
-			msg.rawMatches[msg.matchIndex] = Match{
-				isOnGoing:        false,
-				vs:               vs,
-				timeCountingDown: "已结束",
-				series:           match.series,
-			}
-			var strs []string
-			for _, m := range msg.rawMatches {
-				strs = append(strs, m.GetMDMatchInfo())
-			}
+			match.vs = vs
+			match.timeCountingDown = "已结束"
+			match.isOnGoing = false
+			msg := match.GetMDMatchInfo()
 			for _, irc := range ircs {
-				content := irc.ResolveMessage(strs)
+				content := irc.ResolveMessage([]string{msg})
 				if err := irc.Send(content); err != nil {
 					logrus.Errorf("send FIN message: %q", err)
 					continue

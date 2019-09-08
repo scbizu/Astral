@@ -13,7 +13,6 @@ import (
 	cache "github.com/patrickmn/go-cache"
 	"github.com/robfig/cron"
 	"github.com/scbizu/Astral/internal/mcache"
-	"github.com/scylladb/go-set/strset"
 	"github.com/sirupsen/logrus"
 )
 
@@ -38,27 +37,19 @@ func NewCron() *mCron {
 	}
 }
 
-type PMatch struct {
-	msgID      string
-	matchIndex int
-	rawMatches []Match
-}
-
 type Fetcher struct {
 	c             *mCron
 	cache         *cache.Cache
 	dsts          []IRC
-	pushedMatches map[string]PMatch
+	pushedMatches []Match
 	sync.Mutex
 }
 
 func NewFetcher(s ...IRC) *Fetcher {
-	p := make(map[string]PMatch)
 	return &Fetcher{
-		c:             new(mCron),
-		cache:         matchCache,
-		dsts:          s,
-		pushedMatches: p,
+		c:     new(mCron),
+		cache: matchCache,
+		dsts:  s,
 	}
 }
 
@@ -112,73 +103,19 @@ func (f *Fetcher) refreshCache() error {
 		return err
 	}
 
-	// matches = f.reuseCache(timelines, matches)
-
 	go f.pushMSG(timelines, matches)
 
 	for t, ms := range matches {
-		// last  match  is terminated
-		if _, ok := f.cache.Get(strconv.FormatInt(t, 10)); !ok {
-			for key, pm := range f.pushedMatches {
-				GetStashChan().Put(pm)
-				// terminated
-				f.Lock()
-				delete(f.pushedMatches, key)
-				f.Unlock()
-			}
+		// event is still alive
+		if _, ok := f.cache.Get(strconv.FormatInt(t, 10)); ok {
+			continue
+		}
+		for _, pm := range f.pushedMatches {
+			GetStashChan().Put(pm)
 		}
 		f.cache.Set(strconv.FormatInt(t, 10), ms, -1)
 	}
 	return nil
-}
-
-// reuseCache reuse the ongoing match info
-// and delete the out-of-date match info
-// Due to the reuseable cache, from now on , we should manage our cache carefully TAT
-func (f *Fetcher) reuseCache(tls []Timeline, matches map[int64][]Match) map[int64][]Match {
-	// reuse cache:
-	// * the same versus information
-	for t := range matches {
-		var ms []Match
-		// build caches versus
-		vss := strset.New()
-		cachedMatches, ok := f.cache.Get(strconv.FormatInt(t, 10))
-		if ok {
-			ms, mOK := cachedMatches.([]Match)
-			if !mOK {
-				continue
-			}
-			for _, m := range ms {
-				vss.Add(m.GetVS())
-			}
-		}
-		// filter matches
-		for _, m := range matches[t] {
-			if vss.Has(m.GetVS()) {
-				continue
-			}
-			ms = append(ms, m)
-		}
-		matches[t] = ms
-	}
-
-	if len(tls) == 0 {
-		return matches
-	}
-
-	sort.SliceStable(tls, func(i, j int) bool {
-		return tls[i].T < tls[j].T
-	})
-
-	// expire cache : T is less than the index 0 (the lowest one)
-	for t := range matches {
-		if t >= tls[0].T {
-			continue
-		}
-		delete(matches, t)
-		f.cache.Delete(strconv.FormatInt(t, 10))
-	}
-	return matches
 }
 
 func (f *Fetcher) pushMSG(tls []Timeline, matches map[int64][]Match) {
@@ -215,26 +152,21 @@ func (f *Fetcher) pushWithLimit(matches []Match, limit int) {
 
 	splitMatches := splitMatch(matches, limit)
 
+	for _, m := range matches {
+		f.pushedMatches = append(f.pushedMatches, m)
+	}
+
 	// use n goroutines to send message
 	for _, dst := range f.dsts {
 		go func(dst Sender) {
 			var idx int
 		SEND:
 			msg := dst.ResolveMessage(splitMatchesStr[idx])
-			msgID, err := dst.SendAndReturnID(msg, CacheMessageFilter{})
-			if err != nil {
+			if err := dst.Send(msg, CacheMessageFilter{}); err != nil {
 				logrus.Errorf("sender: %s", err.Error())
 				return
 			}
 			f.Lock()
-			for i, m := range splitMatches[idx] {
-				mid := msgID
-				f.pushedMatches[m.GetMDMatchInfo()] = PMatch{
-					rawMatches: splitMatches[idx],
-					msgID:      mid,
-					matchIndex: i,
-				}
-			}
 			if err := mcache.AddMessage(msg, mcache.MD5{}); err != nil {
 				logrus.Errorf("mcache: set cache: %q", err)
 				// ignore and fallthrough
