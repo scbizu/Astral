@@ -1,5 +1,5 @@
 
-FROM golang:1.12 AS BUILDER
+FROM golang:1.13 AS BUILDER
 
 WORKDIR /project/Astral
 
