@@ -40,10 +40,10 @@ func (b *Bot) Send(msg string, fs ...tl.Filter) error {
 		return nil
 	}
 	b.Lock()
+	defer b.teardown()
 	if err := b.session.Open(); err != nil {
 		return err
 	}
-	defer b.teardown()
 
 	if _, err := b.session.ChannelMessageSendEmbed(
 		config.DiscordCNSC2ChannelID,
