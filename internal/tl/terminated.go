@@ -23,6 +23,10 @@ func (s Stash) Run(ircs ...IRC) {
 	for {
 		select {
 		case match := <-s:
+			if match.vs.P1 == "" || match.vs.P2 == "" {
+				logrus.Warnf("match series parser rules not set")
+				continue
+			}
 			vs, err := GetFinalMatchRes(match.detailURL, match.vs.P1, match.vs.P2)
 			if err != nil {
 				logrus.Warnf("update message: %q", err)
