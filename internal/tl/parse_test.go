@@ -94,5 +94,4 @@ func TestGetFinalMatchRes(t *testing.T) {
 		return
 	}
 	t.Errorf("get score not expect, versus %+#v", v)
-	return
 }

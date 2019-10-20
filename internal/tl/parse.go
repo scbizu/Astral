@@ -94,14 +94,6 @@ func (m Match) GetMDMatchInfo() string {
 	return fmt.Sprintf(" 【🐔 比赛对阵】 %s \n 【🏆 所属杯赛】 %s \n 【⏳ 比赛状态】 %s", m.vs.f(), m.series, m.timeCountingDown)
 }
 
-func (m Match) GetJSONMatchInfo() (string, error) {
-	matchesJSON, err := json.Marshal(m)
-	if err != nil {
-		return "", err
-	}
-	return string(matchesJSON), nil
-}
-
 func NewMatchParser() (MatchParser, error) {
 	r, err := GetHTMLMatchesResp()
 	if err != nil {

@@ -130,9 +130,7 @@ func (f *Fetcher) pushMSG(tls []Timeline, matches map[int64][]Match) {
 		if !ok {
 			continue
 		}
-		for _, m := range ms {
-			sortedMatches = append(sortedMatches, m)
-		}
+		sortedMatches = append(sortedMatches, ms...)
 	}
 	f.pushWithLimit(sortedMatches, 5)
 }
@@ -152,9 +150,7 @@ func (f *Fetcher) pushWithLimit(matches []Match, limit int) {
 
 	splitMatches := splitMatch(matches, limit)
 
-	for _, m := range matches {
-		f.pushedMatches = append(f.pushedMatches, m)
-	}
+	f.pushedMatches = append(f.pushedMatches, matches...)
 
 	// use n goroutines to send message
 	for _, dst := range f.dsts {
@@ -188,7 +184,7 @@ func split(buf []string, lim int) [][]string {
 		chunks = append(chunks, chunk)
 	}
 	if len(buf) > 0 {
-		chunks = append(chunks, buf[:len(buf)])
+		chunks = append(chunks, buf[:])
 	}
 	return chunks
 }
@@ -201,7 +197,7 @@ func splitMatch(buf []Match, lim int) [][]Match {
 		chunks = append(chunks, chunk)
 	}
 	if len(buf) > 0 {
-		chunks = append(chunks, buf[:len(buf)])
+		chunks = append(chunks, buf[:])
 	}
 	return chunks
 }
