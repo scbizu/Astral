@@ -54,8 +54,6 @@ func NewFetcher(s ...IRC) *Fetcher {
 }
 
 func (f *Fetcher) Register() {
-	// register match terminated runner
-	go GetStashChan().Run(f.dsts...)
 	// register match message cache
 	mcache.EnableMessageCache()
 }
@@ -109,9 +107,6 @@ func (f *Fetcher) refreshCache() error {
 		// event is still alive
 		if _, ok := f.cache.Get(strconv.FormatInt(t, 10)); ok {
 			continue
-		}
-		for _, pm := range f.pushedMatches {
-			GetStashChan().Put(pm)
 		}
 		f.cache.Set(strconv.FormatInt(t, 10), ms, -1)
 	}
