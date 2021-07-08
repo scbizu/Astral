@@ -103,7 +103,7 @@ func NewMatchParser() (MatchParser, error) {
 
 	revID, rawHTML, err := newParseRespFromReader(r)
 	if err != nil {
-		return MatchParser{}, nil
+		return MatchParser{}, err
 	}
 	return MatchParser{
 		revID:   revID,

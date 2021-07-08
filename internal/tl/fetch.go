@@ -80,10 +80,14 @@ func (f *Fetcher) refreshCache() error {
 		return err
 	}
 	cacheRevID, ok := f.cache.Get(version)
-	if ok && cacheRevID == p.GetRevID() {
+	switch {
+	case ok && cacheRevID == p.GetRevID():
 		return nil
+	case ok:
+		logrus.Infof("LastRevID: %d, CurrentRevID: %d", cacheRevID, p.GetRevID())
+	default:
+		logrus.Infof("CurrentRevID: %d", p.GetRevID())
 	}
-	logrus.Infof("LastRevID: %d, CurrentRevID: %d", cacheRevID, p.GetRevID())
 	defer func() {
 		f.cache.Set(version, p.GetRevID(), -1)
 	}()
