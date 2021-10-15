@@ -35,8 +35,7 @@ jobs:
           file: ./Dockerfile
           push: true
           # up to metadata action
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
+          tags: latest
       # - name: Deploy Astral
       #   uses: wshihadeh/docker-deployment-action@v1
       #   run: |
