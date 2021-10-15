@@ -25,6 +25,7 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: Extract Docker Image Metadata
+        id: meta
         uses: docker/metadata-action@v3
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
@@ -35,7 +36,8 @@ jobs:
           file: ./Dockerfile
           push: true
           # up to metadata action
-          tags: latest
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
       # - name: Deploy Astral
       #   uses: wshihadeh/docker-deployment-action@v1
       #   run: |
