@@ -18,7 +18,6 @@ jobs:
         go: [ 'go1.17' ]
     steps:
       - uses: actions/checkout@v2
-      - name: Run Tests
       - name: Docker Login
         uses: docker/login-action@v1
         with:
