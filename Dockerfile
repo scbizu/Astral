@@ -7,7 +7,7 @@ ADD . /project/Astral
 
 RUN export GO11MODULE="on" && go build -o astral .
 
-FROM golang:1.13
+FROM golang:1.17
 
 WORKDIR /Astral
 
