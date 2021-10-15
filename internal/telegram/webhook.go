@@ -67,7 +67,7 @@ func (b *Bot) ServeBotUpdateMessage() error {
 		pluginHub := hub.NewTGPluginHub(update.Message)
 		msg := pluginHub.RegistTGEnabledPlugins(update.Message)
 		if isMsgBadRequest(msg) {
-			msg = tgbotapi.NewMessage(update.Message.Chat.ID, "Astral服务酱表示不想理你")
+			continue
 		}
 
 		mbNames, ok := isMsgNewMember(update)
@@ -86,7 +86,6 @@ func (b *Bot) ServeBotUpdateMessage() error {
 	}
 	return nil
 }
-
 
 func isMsgNewMember(update tgbotapi.Update) ([]string, bool) {
 	members := update.Message.NewChatMembers
