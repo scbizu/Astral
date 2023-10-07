@@ -1,34 +1,44 @@
 package hub
 
 import (
-	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
+	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	plugin "github.com/scbizu/Astral/internal/plugin"
+	"github.com/scbizu/Astral/internal/plugin/ai"
 	"github.com/scbizu/Astral/internal/plugin/py"
 	"github.com/scbizu/Astral/internal/plugin/sayhi"
-	"github.com/scbizu/Astral/internal/plugin/today-anime"
+	anime "github.com/scbizu/Astral/internal/plugin/today-anime"
 	"github.com/sirupsen/logrus"
 )
 
 // TGPluginHub defines the telegram plugin hub
 type TGPluginHub struct {
+	msg     *tgbotapi.Message
 	plugins []*plugin.TGPlugin
+}
+
+var plugins = []plugin.IPlugin{
+	&sayhi.Handler{},
+	&anime.Handler{},
+	&ai.AICommands{},
+	// py plugin must be put in the end
+	&py.Handler{},
 }
 
 // NewTGPluginHub init empty plugin hub
 func NewTGPluginHub(msg *tgbotapi.Message) *TGPluginHub {
 	hub := &TGPluginHub{
 		plugins: []*plugin.TGPlugin{},
+		msg:     msg,
 	}
-	hub.Init(msg)
+	hub.Init()
 	return hub
 }
 
 // Init regist all command
-func (ph *TGPluginHub) Init(msg *tgbotapi.Message) {
-	ph.AddPlugin(sayhi.Sayhi(msg))
-	ph.AddPlugin(anime.Anime(msg))
-	// py plugin must be put in the end
-	defer ph.AddPlugin(py.PY(msg))
+func (ph *TGPluginHub) Init() {
+	for _, p := range plugins {
+		ph.AddTGPlugin(p)
+	}
 }
 
 // GetEnabledTelegramPlugins get the all enable plugins
@@ -41,14 +51,18 @@ func (ph *TGPluginHub) GetEnabledTelegramPlugins() (activePlugins []*plugin.TGPl
 	return
 }
 
-// AddPlugin adds the plugin
-func (ph *TGPluginHub) AddPlugin(p *plugin.TGPlugin) {
-	ph.plugins = append(ph.plugins, p)
+func (ph *TGPluginHub) AddTGPlugin(
+	p plugin.IPlugin,
+) {
+	ph.plugins = append(ph.plugins,
+		plugin.NewTGPlugin(p.Name(),
+			p.Process(ph.msg),
+		),
+	)
 }
 
-// RegistTGEnabledPlugins regists telegram plugin
-func (ph *TGPluginHub) RegistTGEnabledPlugins(rawmsg *tgbotapi.Message) (msg tgbotapi.MessageConfig) {
-
+// Do iters telegram plugin
+func (ph *TGPluginHub) Do(rawmsg *tgbotapi.Message) (msg tgbotapi.MessageConfig) {
 	for _, p := range ph.GetEnabledTelegramPlugins() {
 		msg, _ = p.Run(rawmsg)
 		logrus.Infof("[chatID:%d,msg:%s]", msg.ChatID, msg.Text)

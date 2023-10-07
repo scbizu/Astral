@@ -1,16 +1,18 @@
 
-FROM golang:1.17 AS BUILDER
+FROM golang:1.21 AS BUILDER
 
 WORKDIR /project/Astral
 
 ADD . /project/Astral
 
-RUN export GO11MODULE="on" && go build -o astral .
+RUN go build -o astral .
 
-FROM golang:1.17
+FROM golang:1.21
 
 WORKDIR /Astral
 
 COPY --from=BUILDER /project/Astral/astral /Astral/astral
 
+EXPOSE 8443
 
+ENTRYPOINT [ "/Astral/astral" ]

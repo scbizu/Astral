@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"os"
 
-	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
+	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/scbizu/Astral/internal/plugin/hub"
 	"github.com/scbizu/Astral/pkg/getcert"
 	"github.com/sirupsen/logrus"
@@ -39,10 +39,13 @@ func listenWebhook() {
 
 func (b *Bot) ServeBotUpdateMessage() error {
 	go listenWebhook()
-	b.bot.RemoveWebhook()
 	cert := getcert.NewDomainCert(tgAPIDomain)
 	domainWithToken := fmt.Sprintf("%s/%s", cert.GetDomain(), token)
-	if _, err := b.bot.SetWebhook(tgbotapi.NewWebhook(domainWithToken)); err != nil {
+	wh, err := tgbotapi.NewWebhook(domainWithToken)
+	if err != nil {
+		return err
+	}
+	if _, err := b.bot.Request(wh); err != nil {
 		logrus.Errorf("notify webhook failed:%s", err.Error())
 		return err
 	}
@@ -54,7 +57,7 @@ func (b *Bot) ServeBotUpdateMessage() error {
 		}
 		logrus.Debug(info.LastErrorMessage, info.LastErrorDate)
 	}
-	pattern := fmt.Sprintf("/tg/%s", token)
+	pattern := fmt.Sprintf("/%s", token)
 	updatesMsgChannel := b.bot.ListenForWebhook(pattern)
 
 	logrus.Debugf("msg in channel:%d", len(updatesMsgChannel))
@@ -65,7 +68,7 @@ func (b *Bot) ServeBotUpdateMessage() error {
 			continue
 		}
 		pluginHub := hub.NewTGPluginHub(update.Message)
-		msg := pluginHub.RegistTGEnabledPlugins(update.Message)
+		msg := pluginHub.Do(update.Message)
 		if isMsgBadRequest(msg) {
 			continue
 		}
@@ -92,11 +95,11 @@ func isMsgNewMember(update tgbotapi.Update) ([]string, bool) {
 	if members == nil {
 		return nil, false
 	}
-	if len(*members) == 0 {
+	if len(members) == 0 {
 		return nil, false
 	}
 	var mbNames []string
-	for _, m := range *members {
+	for _, m := range members {
 		mbNames = append(mbNames, m.String())
 	}
 	return mbNames, true

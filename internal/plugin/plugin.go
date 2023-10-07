@@ -3,14 +3,12 @@ package plugin
 import (
 	"fmt"
 
-	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
+	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
+	"github.com/scbizu/Astral/internal/telegram/command"
 	"github.com/sirupsen/logrus"
 )
 
-// Handler defines plugin must impl interface
-type Handler interface {
-	Register(msg *tgbotapi.Message) tgbotapi.MessageConfig
-}
+type Handler func(msg *tgbotapi.Message) tgbotapi.MessageConfig
 
 // TGPlugin defines the common telegram plugin
 type TGPlugin struct {
@@ -19,12 +17,20 @@ type TGPlugin struct {
 	name      string
 }
 
+type IPlugin interface {
+	Name() command.CommanderName
+	Enable() bool
+	Process(*tgbotapi.Message) tgbotapi.MessageConfig
+}
+
 // NewTGPlugin init the tg plugin
-func NewTGPlugin(name string, msg *tgbotapi.Message, handler Handler) *TGPlugin {
+func NewTGPlugin(name command.CommanderName,
+	conf tgbotapi.MessageConfig,
+) *TGPlugin {
 	return &TGPlugin{
 		enable:    true,
-		configure: handler.Register(msg),
-		name:      name,
+		configure: conf,
+		name:      name.String(),
 	}
 }
 

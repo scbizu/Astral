@@ -1,11 +1,11 @@
 package telegram
 
 import (
-	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
+	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/sirupsen/logrus"
 )
 
-//PullAndReply pull the msg (long polling) and response
+// PullAndReply pull the msg (long polling) and response
 func PullAndReply() (err error) {
 	bot, err := ConnectTG()
 	if err != nil {
@@ -17,10 +17,7 @@ func PullAndReply() (err error) {
 	config := tgbotapi.NewUpdate(0)
 	config.Timeout = 60
 
-	updates, err := bot.GetUpdatesChan(config)
-	if err != nil {
-		return
-	}
+	updates := bot.GetUpdatesChan(config)
 
 	for update := range updates {
 		if update.Message == nil {

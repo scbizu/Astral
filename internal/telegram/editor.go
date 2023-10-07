@@ -3,7 +3,7 @@ package telegram
 import (
 	"strconv"
 
-	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
+	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
 
 func (ts *Telegram) Edit(msgID string, content string) error {
