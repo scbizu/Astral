@@ -24,11 +24,11 @@ func (ai *AICommands) Enable() bool {
 	return true
 }
 
-func (ai *AICommands) Process(msg *tgbotapi.Message) tgbotapi.MessageConfig {
+func (ai *AICommands) Process(msg *tgbotapi.Message) tgbotapi.Chattable {
 	cmd := command.NewCommand(
 		command.CommandAIChat,
 		"chat with openAI",
-		func(msg *tgbotapi.Message) tgbotapi.MessageConfig {
+		func(msg *tgbotapi.Message) tgbotapi.Chattable {
 			resp, err := openai.GetOpenAIClient().CreateCompletion(context.TODO(), &chat.CreateCompletionParams{
 				Messages: []*chat.Message{
 					{Role: "user", Content: msg.Text},

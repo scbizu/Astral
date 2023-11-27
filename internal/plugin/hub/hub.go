@@ -62,12 +62,15 @@ func (ph *TGPluginHub) AddTGPlugin(
 }
 
 // Do iters telegram plugin
-func (ph *TGPluginHub) Do(rawmsg *tgbotapi.Message) (msg tgbotapi.MessageConfig) {
+func (ph *TGPluginHub) Do(rawmsg *tgbotapi.Message) (msg tgbotapi.Chattable) {
 	for _, p := range ph.GetEnabledTelegramPlugins() {
 		msg, _ = p.Run(rawmsg)
-		logrus.Infof("[chatID:%d,msg:%s]", msg.ChatID, msg.Text)
-		if p.Validate(msg) {
-			return
+		if _, ok := msg.(tgbotapi.MessageConfig); ok {
+			msgConf := msg.(tgbotapi.MessageConfig)
+			logrus.Infof("[chatID:%d,msg:%s]", msgConf.ChatID, msgConf.Text)
+			if p.Validate(msgConf) {
+				return
+			}
 		}
 	}
 

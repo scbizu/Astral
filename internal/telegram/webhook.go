@@ -69,23 +69,24 @@ func (b *Bot) ServeBotUpdateMessage() error {
 		}
 		pluginHub := hub.NewTGPluginHub(update.Message)
 		msg := pluginHub.Do(update.Message)
-		if isMsgBadRequest(msg) {
-			continue
+		if msgConf, ok := msg.(tgbotapi.MessageConfig); ok {
+			if isMsgBadRequest(msgConf) {
+				continue
+			}
+			mbNames, ok := isMsgNewMember(update)
+			if ok {
+				msgConf = tgbotapi.NewMessage(update.Message.Chat.ID, fmt.Sprintf("撒花欢迎新基佬(%v)入群", mbNames))
+			}
+			_, ok = isMsgLeftMember(update)
+			if ok {
+				// drop the member left message
+				continue
+			}
+			msgConf.ReplyToMessageID = update.Message.MessageID
+			b.bot.Send(msgConf)
+		} else {
+			b.bot.Send(msg)
 		}
-
-		mbNames, ok := isMsgNewMember(update)
-		if ok {
-			msg = tgbotapi.NewMessage(update.Message.Chat.ID, fmt.Sprintf("撒花欢迎新基佬(%v)入群", mbNames))
-		}
-
-		_, ok = isMsgLeftMember(update)
-		if ok {
-			// drop the member left message
-			continue
-		}
-
-		msg.ReplyToMessageID = update.Message.MessageID
-		b.bot.Send(msg)
 	}
 	return nil
 }

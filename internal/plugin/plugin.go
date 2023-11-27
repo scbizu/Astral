@@ -13,19 +13,19 @@ type Handler func(msg *tgbotapi.Message) tgbotapi.MessageConfig
 // TGPlugin defines the common telegram plugin
 type TGPlugin struct {
 	enable    bool
-	configure tgbotapi.MessageConfig
+	configure tgbotapi.Chattable
 	name      string
 }
 
 type IPlugin interface {
 	Name() command.CommanderName
 	Enable() bool
-	Process(*tgbotapi.Message) tgbotapi.MessageConfig
+	Process(*tgbotapi.Message) tgbotapi.Chattable
 }
 
 // NewTGPlugin init the tg plugin
 func NewTGPlugin(name command.CommanderName,
-	conf tgbotapi.MessageConfig,
+	conf tgbotapi.Chattable,
 ) *TGPlugin {
 	return &TGPlugin{
 		enable:    true,
@@ -40,7 +40,7 @@ func (p *TGPlugin) IsPluginEnable() bool {
 }
 
 // Run runs the enabled plugins
-func (p *TGPlugin) Run(msg *tgbotapi.Message) (tgbotapi.MessageConfig, error) {
+func (p *TGPlugin) Run(msg *tgbotapi.Message) (tgbotapi.Chattable, error) {
 	if p.enable {
 		return p.configure, nil
 	}

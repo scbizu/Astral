@@ -9,7 +9,7 @@ import (
 )
 
 // Handler defines handle func
-type Handler func(msg *tgbotapi.Message) tgbotapi.MessageConfig
+type Handler func(msg *tgbotapi.Message) tgbotapi.Chattable
 
 // CommanderName defines command's literal name
 type CommanderName string
@@ -30,12 +30,14 @@ const (
 	CommandShowAllCommand CommanderName = "show_commands"
 	// CommandAIChat makes bot chat with you
 	CommandAIChat CommanderName = "chat"
+	// CommandTTS makes bot say something
+	CommandTTS CommanderName = "tts"
 )
 
 var allCommandsMapping *sync.Map
 
 // DefaultBehavior defines the  default behavior of commander
-var DefaultBehavior = func(msg *tgbotapi.Message) tgbotapi.MessageConfig {
+var DefaultBehavior = func(msg *tgbotapi.Message) tgbotapi.Chattable {
 	defaultText := fmt.Sprintf("%s 命中了,但是作者什么都没有实现哦😞", msg.Command())
 	return tgbotapi.NewMessage(msg.Chat.ID, defaultText)
 }
@@ -65,7 +67,7 @@ func (c CommanderName) String() string {
 }
 
 // Do will run the command behavior
-func (c *Commander) Do(msg *tgbotapi.Message) tgbotapi.MessageConfig {
+func (c *Commander) Do(msg *tgbotapi.Message) tgbotapi.Chattable {
 	if msg.Command() != string(c.Name) {
 		logrus.Infof("%s skiped command %s", msg.Command(), string(c.Name))
 		return tgbotapi.MessageConfig{}

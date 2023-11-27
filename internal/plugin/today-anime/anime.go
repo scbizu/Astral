@@ -12,8 +12,8 @@ var _ plugin.IPlugin = (*Handler)(nil)
 type Handler struct{}
 
 // Register register anime plugin
-func (h *Handler) Process(msg *tgbotapi.Message) tgbotapi.MessageConfig {
-	handler := func(msg *tgbotapi.Message) tgbotapi.MessageConfig {
+func (h *Handler) Process(msg *tgbotapi.Message) tgbotapi.Chattable {
+	handler := func(msg *tgbotapi.Message) tgbotapi.Chattable {
 		return tgbotapi.MessageConfig{
 			BaseChat: tgbotapi.BaseChat{
 				ChatID:           msg.Chat.ID,

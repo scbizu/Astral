@@ -15,8 +15,8 @@ var _ plugin.IPlugin = (*Handler)(nil)
 type Handler struct{}
 
 // Register regists py plugin
-func (h *Handler) Process(msg *tgbotapi.Message) tgbotapi.MessageConfig {
-	pyHandler := func(msg *tgbotapi.Message) tgbotapi.MessageConfig {
+func (h *Handler) Process(msg *tgbotapi.Message) tgbotapi.Chattable {
+	pyHandler := func(msg *tgbotapi.Message) tgbotapi.Chattable {
 		pyStr := format(command.GetAllCommands())
 		return tgbotapi.NewMessage(msg.Chat.ID, pyStr)
 	}

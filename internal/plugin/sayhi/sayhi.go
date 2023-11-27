@@ -23,8 +23,8 @@ func (h *Handler) Enable() bool {
 }
 
 // Register regists sayhi plugin
-func (h *Handler) Process(msg *tgbotapi.Message) tgbotapi.MessageConfig {
-	sayHandler := func(msg *tgbotapi.Message) tgbotapi.MessageConfig {
+func (h *Handler) Process(msg *tgbotapi.Message) tgbotapi.Chattable {
+	sayHandler := func(msg *tgbotapi.Message) tgbotapi.Chattable {
 		user := msg.From.UserName
 		if user == masterName {
 			user = "master"
