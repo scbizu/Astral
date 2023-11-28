@@ -69,7 +69,14 @@ func (b *Bot) ServeBotUpdateMessage() error {
 		}
 		pluginHub := hub.NewTGPluginHub(update.Message)
 		msg := pluginHub.Do(update.Message)
-		if msgConf, ok := msg.(tgbotapi.MessageConfig); ok {
+		switch msgConf := msg.(type) {
+		case tgbotapi.VoiceConfig:
+			msgConf.ReplyToMessageID = update.Message.MessageID
+			logrus.Debugf("[raw msg][sent]:%#v\n", msg)
+			if _, err := b.bot.Send(msg); err != nil {
+				logrus.Errorf("send msg failed:%q", err)
+			}
+		case tgbotapi.MessageConfig:
 			if isMsgBadRequest(msgConf) {
 				continue
 			}
@@ -83,9 +90,11 @@ func (b *Bot) ServeBotUpdateMessage() error {
 				continue
 			}
 			msgConf.ReplyToMessageID = update.Message.MessageID
-			b.bot.Send(msgConf)
-		} else {
-			b.bot.Send(msg)
+			if _, err := b.bot.Send(msgConf); err != nil {
+				logrus.Errorf("send msg failed:%q", err)
+			}
+		default:
+			logrus.Errorf("unknown msg type:%T", msgConf)
 		}
 	}
 	return nil

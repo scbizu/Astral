@@ -7,6 +7,7 @@ import (
 	"github.com/scbizu/Astral/internal/plugin/py"
 	"github.com/scbizu/Astral/internal/plugin/sayhi"
 	anime "github.com/scbizu/Astral/internal/plugin/today-anime"
+	"github.com/scbizu/Astral/internal/plugin/tts"
 	"github.com/sirupsen/logrus"
 )
 
@@ -20,6 +21,7 @@ var plugins = []plugin.IPlugin{
 	&sayhi.Handler{},
 	&anime.Handler{},
 	&ai.AICommands{},
+	&tts.TTSCommand{},
 	// py plugin must be put in the end
 	&py.Handler{},
 }
@@ -62,17 +64,20 @@ func (ph *TGPluginHub) AddTGPlugin(
 }
 
 // Do iters telegram plugin
-func (ph *TGPluginHub) Do(rawmsg *tgbotapi.Message) (msg tgbotapi.Chattable) {
+func (ph *TGPluginHub) Do(rawmsg *tgbotapi.Message) tgbotapi.Chattable {
 	for _, p := range ph.GetEnabledTelegramPlugins() {
-		msg, _ = p.Run(rawmsg)
-		if _, ok := msg.(tgbotapi.MessageConfig); ok {
-			msgConf := msg.(tgbotapi.MessageConfig)
+		msg, _ := p.Run(rawmsg)
+		switch msgConf := msg.(type) {
+		case tgbotapi.VoiceConfig:
+			logrus.Infof("[chatID:%d]", msgConf.ChatID)
+			return msgConf
+		case tgbotapi.MessageConfig:
 			logrus.Infof("[chatID:%d,msg:%s]", msgConf.ChatID, msgConf.Text)
 			if p.Validate(msgConf) {
-				return
+				return msgConf
 			}
 		}
 	}
 
-	return
+	return tgbotapi.NewMessage(rawmsg.Chat.ID, "hello ?")
 }

@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"fmt"
 	"io"
 	"net/http"
 	"net/url"
@@ -17,12 +18,19 @@ type Client struct {
 	model   string
 }
 
+type BadResponse struct {
+	Detail struct {
+		Status  string `json:"status"`
+		Message string `json:"message"`
+	} `json:"detail"`
+}
+
 func NewElevenLabClient() *Client {
 	return &Client{
 		domain:  "https://api.elevenlabs.io/v1/text-to-speech/",
 		voiceID: "21m00Tcm4TlvDq8ikWAM",
 		apiKey:  os.Getenv("ELEVEN_LAB_API_KEY"),
-		model:   "eleven_monolingual_v2",
+		model:   "eleven_monolingual_v1",
 	}
 }
 
@@ -46,6 +54,9 @@ func (c *Client) ToSpeech(ctx context.Context, text string) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("xi-api-key", c.apiKey)
+
 	resp, err := http.DefaultClient.Do(req.WithContext(ctx))
 	if err != nil {
 		return nil, err
@@ -55,6 +66,14 @@ func (c *Client) ToSpeech(ctx context.Context, text string) ([]byte, error) {
 	respBody, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return nil, err
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		details := &BadResponse{}
+		if err := json.NewDecoder(bytes.NewBuffer(respBody)).Decode(&details); err != nil {
+			return nil, err
+		}
+		return nil, fmt.Errorf("[11lab] bad response: %s", details.Detail.Message)
 	}
 
 	return respBody, nil
